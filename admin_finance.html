@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Finance</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 60px; /* Add padding for fixed header */
+            padding-bottom: 80px; /* Add padding for fixed bottom nav */
+            box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f0f0f0;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+         .admin-header .header-content {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             width: 100%;
+             position: relative;
+             padding: 0 20px; /* Add horizontal padding */
+             box-sizing: border-box;
+         }
+
+        .admin-header img {
+            width: 30px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0 auto; /* Center the title */
+            font-weight: bold;
+        }
+
+         .admin-header .back-link { /* Style for the back link */
+             position: absolute;
+             left: 20px;
+             font-size: 1.5em;
+             color: #333;
+             text-decoration: none;
+             line-height: 1;
+         }
+
+         .admin-header .coffee-icon {
+             position: absolute;
+             right: 20px; /* Position it on the right */
+             font-size: 1.8em;
+             color: #AE00FF;
+             cursor: pointer;
+             line-height: 1;
+         }
+
+        .admin-main-content {
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            flex-grow: 1;
+            padding-top: 20px;
+            box-sizing: border-box;
+        }
+
+        .admin-main-content h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Styles for Pending Transactions */
+        .pending-transaction-wrapper {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            display: flex; /* Use flex to lay out inner content */
+            flex-direction: column; /* Stack details and actions */
+        }
+
+        .pending-transaction-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 15px; /* Add padding below details */
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px; /* Space below the details box */
+        }
+
+        .pending-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .pending-mobile {
+             font-weight: bold;
+             color: #555;
+        }
+
+        .pending-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #AE00FF;
+            margin-bottom: 10px;
+        }
+
+        .pending-fullname {
+            font-size: 1em;
+            color: #333;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .action-button {
+            flex-grow: 1;
+            margin: 0 5px;
+            padding: 10px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .confirm-button {
+            background-color: green;
+            color: white;
+        }
+        .confirm-button:hover {
+            background-color: darkgreen;
+        }
+
+        .decline-button {
+            background-color: red;
+            color: white;
+        }
+        .decline-button:hover {
+            background-color: darkred;
+        }
+
+         /* New style for Settled/Declined status box */
+         .status-indicator {
+             width: 100%;
+             padding: 10px 0;
+             border-radius: 5px;
+             font-size: 1em;
+             font-weight: bold;
+             text-align: center;
+             color: white;
+             box-sizing: border-box;
+         }
+
+         .status-indicator.settled {
+             background-color: green; /* Green for settled */
+         }
+         .status-indicator.declined {
+             background-color: red; /* Red for declined */
+         }
+
+
+        .no-pending-message {
+            font-size: 1.1em;
+            color: #777;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* Styles for the fixed bottom nav (copied from admin.html for consistency) */
+        #admin-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 500;
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .admin-bottom-icons-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .admin-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #777; /* Default icon color */
+            font-size: 0.9em;
+            text-align: center;
+            width: 30%; /* Distribute space */
+        }
+
+        .admin-icon-item i {
+            font-size: 2em;
+            line-height: 0; /* Needed for Phosphor icons */
+            transition: color 0.2s ease;
+        }
+        #admin-bottom-nav .admin-icon-item.active i {
+            color: #AE00FF;
+        }
+    </style>
+</head>
+<body class="admin_finance_page">
+    <script>
+        // Admin pages will remain light themed
+        document.body.classList.remove('dark-mode');
+    </script>
+    <div class="admin-header">
+        <div class="header-content">
+             <a href="admin.html" class="back-link">&larr;</a> <!-- Added back link -->
+             <img src="https://upload.pinnocent.com/assets/files/upload-1746004279.jpeg" alt="Logo">
+            <h1>Admin Finance</h1>
+             <i id="admin-finance-coffee-icon" class="ph-coffee coffee-icon"></i> <!-- Coffee icon -->
+        </div>
+    </div>
+
+    <div class="admin-main-content">
+        <h2>Pending Transactions</h2>
+        <div id="pending-transactions-list">
+            <!-- Pending transactions will be loaded here -->
+        </div>
+        <p id="no-pending-message" class="no-pending-message">No pending transactions.</p>
+    </div>
+
+    <!-- Fixed Bottom Navigation -->
+    <div id="admin-bottom-nav">
+        <div class="admin-bottom-icons-row">
+            <div id="admin-nav-customer-service" class="admin-icon-item">
+                <i class="ph-users"></i>
+            </div>
+            <div id="admin-nav-finance" class="admin-icon-item active">
+                <i class="ph-currency-ngn"></i> <!-- Using Naira icon -->
+            </div>
+            <div id="admin-nav-communication" class="admin-icon-item">
+                <i class="ph-microphone"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+             console.log("Admin Finance page loaded.");
+
+             const pendingTransactionsList = document.getElementById('pending-transactions-list');
+             const noPendingMessage = document.getElementById('no-pending-message');
+             const adminFinanceCoffeeIcon = document.getElementById('admin-finance-coffee-icon'); // Get coffee icon
+
+             // Get references to the new icon items
+             const adminNavCustomerService = document.getElementById('admin-nav-customer-service');
+             const adminNavFinance = document.getElementById('admin-nav-finance');
+             const adminNavCommunication = document.getElementById('admin-nav-communication');
+             const adminBottomNavItems = document.querySelectorAll('#admin-bottom-nav .admin-icon-item');
+            // Ensure showAppNotification is available
+            const showAppNotification = window.showAppNotification;
+
+             // Add event listener for the coffee icon
+             adminFinanceCoffeeIcon.addEventListener('click', function() {
+                 console.log("Admin finance coffee icon clicked. Redirecting to login page.");
+                 window.location.href = 'index.html';
+             });
+
+
+            // Function to format currency (assuming NGN)
+            function formatCurrency(amount) {
+                return parseFloat(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Function to calculate 'price money' based on deposit amount
+            function calculatePriceMoney(selectedAmount) {
+                 const amount = parseInt(selectedAmount, 10);
+                 const priceMap = {
+                     2000: 20000,
+                     3000: 30000,
+                     5000: 50000,
+                     10000: 100000
+                 };
+                 return priceMap[amount] || 0;
+             }
+
+
+            function displayPendingTransactions() {
+                let simulatedNotifications = JSON.parse(localStorage.getItem('simulatedNotifications') || '[]');
+
+                // Filter for pending deposit OR failed notifications AND exclude those marked as settled or declined
+                const pendingAndFailed = simulatedNotifications.filter(notif =>
+                    (notif.type === 'pending_deposit' || notif.type === 'failed') &&
+                    notif.adminStatus !== 'Settled' && notif.adminStatus !== 'Declined'
+                );
+
+                 // Include transactions already settled or declined, sorted by when they were settled/declined
+                 const settledAndDeclined = simulatedNotifications.filter(notif =>
+                     notif.adminStatus === 'Settled' || notif.adminStatus === 'Declined'
+                 ).sort((a, b) => b.adminTimestamp - a.adminTimestamp); // Sort by admin action timestamp
+
+
+                pendingTransactionsList.innerHTML = ''; // Clear current list
+
+                // Combine and display pending/failed first, then settled/declined
+                const notificationsToDisplay = [...pendingAndFailed, ...settledAndDeclined];
+
+                if (notificationsToDisplay.length === 0) {
+                    noPendingMessage.classList.remove('hidden');
+                } else {
+                    noPendingMessage.classList.add('hidden');
+
+                    // Sort the combined list - pending/failed newest first, then settled/declined newest first by action time
+                    notificationsToDisplay.sort((a, b) => {
+                         if (a.adminStatus && !b.adminStatus) return 1; // Settled/Declined comes after Pending/Failed
+                         if (!a.adminStatus && b.adminStatus) return -1; // Pending/Failed comes before Settled/Declined
+                         if (a.adminStatus && b.adminStatus) return b.adminTimestamp - a.adminTimestamp; // Sort settled/declined by action time
+                         return b.timestamp - a.timestamp; // Sort pending/failed by original time
+                    });
+
+
+                    notificationsToDisplay.forEach(notif => {
+                        const transactionData = notif.data; // Data holds info like fullName, userPhone, amount/selectedAmount
+
+                        const transactionWrapper = document.createElement('div');
+                        transactionWrapper.classList.add('pending-transaction-wrapper');
+                        transactionWrapper.dataset.notificationTimestamp = notif.timestamp; // Store original timestamp
+                        transactionWrapper.dataset.notificationType = notif.type; // Store original type
+                        // Add dataset for admin status
+                        if (notif.adminStatus) {
+                             transactionWrapper.dataset.adminStatus = notif.adminStatus;
+                             transactionWrapper.dataset.adminTimestamp = notif.adminTimestamp;
+                        }
+
+
+                        const transactionBox = document.createElement('div');
+                        transactionBox.classList.add('pending-transaction-box');
+
+                        const headerDiv = document.createElement('div');
+                        headerDiv.classList.add('pending-header');
+                        const mobileSpan = document.createElement('span');
+                        mobileSpan.classList.add('pending-mobile');
+                        mobileSpan.textContent = transactionData.userPhone || 'N/A';
+                        headerDiv.appendChild(mobileSpan);
+                         // Add timestamp to header for admin view clarity
+                         const timestampSpan = document.createElement('span');
+                         timestampSpan.classList.add('request-timestamp'); // Reuse style from admin.html
+                         timestampSpan.textContent = new Date(notif.timestamp).toLocaleString();
+                         headerDiv.appendChild(timestampSpan);
+
+
+                        const amountDiv = document.createElement('div');
+                        amountDiv.classList.add('pending-amount');
+                        // Use 'amount' for failed, 'selectedAmount' for pending_deposit
+                        const displayAmount = notif.type === 'failed' ? transactionData.amount : transactionData.selectedAmount;
+                        amountDiv.textContent = `₦${formatCurrency(displayAmount)}`;
+
+                        const nameDiv = document.createElement('div');
+                        nameDiv.classList.add('pending-fullname');
+                         // Use 'recipient' for failed, 'fullName' for pending_deposit
+                        const displayFullName = notif.type === 'failed' ? transactionData.recipient : transactionData.fullName;
+                        nameDiv.textContent = displayFullName || 'Full Name Not Provided';
+
+                        transactionBox.appendChild(headerDiv);
+                        transactionBox.appendChild(amountDiv);
+                        transactionBox.appendChild(nameDiv);
+
+                        // Add status indicator for failed transactions (within the box)
+                         if (notif.type === 'failed') {
+                             const statusDiv = document.createElement('div');
+                             statusDiv.style.fontSize = '0.9em';
+                             statusDiv.style.color = 'red';
+                             statusDiv.style.fontWeight = 'bold';
+                             statusDiv.textContent = 'Failed Transfer';
+                             transactionBox.appendChild(statusDiv);
+                         }
+
+
+                        transactionWrapper.appendChild(transactionBox); // Add the details box
+
+                         // Add either action buttons OR status indicator based on adminStatus
+                         if (notif.adminStatus) {
+                             // Display Settled or Declined status
+                             const statusIndicator = document.createElement('div');
+                             statusIndicator.classList.add('status-indicator', notif.adminStatus.toLowerCase()); // Use lowercase for class
+                             statusIndicator.textContent = notif.adminStatus; // Display status text
+                             transactionWrapper.appendChild(statusIndicator);
+                         } else {
+                             // Display action buttons for pending/failed
+                             const actionButtonsDiv = document.createElement('div');
+                             actionButtonsDiv.classList.add('action-buttons');
+
+                             const confirmButton = document.createElement('button');
+                             confirmButton.classList.add('action-button', 'confirm-button');
+                             confirmButton.textContent = 'Confirm';
+                             confirmButton.dataset.notificationTimestamp = notif.timestamp;
+                             confirmButton.dataset.notificationType = notif.type; // Pass type to handler
+                             confirmButton.addEventListener('click', (event) => {
+                                 // Pass the wrapper element to update its state
+                                 const wrapper = event.target.closest('.pending-transaction-wrapper');
+                                 handleConfirm(wrapper, event.target.dataset.notificationTimestamp, event.target.dataset.notificationType);
+                              });
+
+
+                             const declineButton = document.createElement('button');
+                             declineButton.classList.add('action-button', 'decline-button');
+                             declineButton.textContent = 'Decline';
+                             declineButton.dataset.notificationTimestamp = notif.timestamp;
+                             declineButton.dataset.notificationType = notif.type; // Pass type to handler
+                             declineButton.addEventListener('click', (event) => {
+                                 // Pass the wrapper element to update its state
+                                 const wrapper = event.target.closest('.pending-transaction-wrapper');
+                                 handleDecline(wrapper, event.target.dataset.notificationTimestamp, event.target.dataset.notificationType);
+                              });
+
+
+                             actionButtonsDiv.appendChild(confirmButton);
+                             actionButtonsDiv.appendChild(declineButton);
+                             transactionWrapper.appendChild(actionButtonsDiv);
+                         }
+
+
+                        pendingTransactionsList.appendChild(transactionWrapper);
+                    });
+                }
+            }
+
+             // Modified handleConfirm to accept the wrapper element, timestamp and type
+            function handleConfirm(wrapperElement, notificationTimestamp, notificationTypeOriginal) { // Renamed to avoid conflict
+                 let allSimulatedNotifications = JSON.parse(localStorage.getItem('simulatedNotifications') || '[]');
+
+                 // Find the notification using the timestamp and type
+                 const targetNotificationIndex = allSimulatedNotifications.findIndex(
+                     notif => notif.timestamp === parseInt(notificationTimestamp, 10) && notif.type === notificationTypeOriginal
+                 );
+
+                 if (targetNotificationIndex === -1) {
+                     console.error(`Notification (type: ${notificationTypeOriginal}, timestamp: ${notificationTimestamp}) not found for confirmation.`);
+                     return;
+                 }
+                
+                const targetNotification = allSimulatedNotifications[targetNotificationIndex];
+                const transactionData = { ...targetNotification.data }; // Clone data to avoid modifying original in loop
+                const originalNotificationTypeForLogic = targetNotification.type; // Store original type for logic
+
+                 // --- User-specific data update logic ---
+                const affectedUserPhone = transactionData.userPhone;
+                if (!affectedUserPhone) {
+                    console.error("Cannot determine affected user for this transaction.", transactionData);
+                    alert("Error: User for transaction not identified.");
+                    return;
+                }
+
+                let userNotifications = JSON.parse(localStorage.getItem(`user_data_${affectedUserPhone}_simulatedNotifications`) || '[]');
+                let userBalance = parseFloat(localStorage.getItem(`user_data_${affectedUserPhone}_currentBalance`) || '0.00');
+                let notificationAmountValue = 0;
+                let amountStringForNotification = "";
+
+
+                // Find and update the specific notification in the user's list
+                const userNotifIndex = userNotifications.findIndex(
+                    n => n.timestamp === targetNotification.timestamp && n.type === targetNotification.type
+                );
+
+                if (userNotifIndex === -1) {
+                    console.warn("Target notification not found in user-specific list, might be a new addition from global if logic was mixed.");
+                    // As a fallback, or if it's a new type of interaction, we might need to add it.
+                    // For now, let's assume it should exist if admin is acting on it.
+                }
+
+
+                 if (originalNotificationTypeForLogic === 'pending_deposit') {
+                     notificationAmountValue = calculatePriceMoney(transactionData.selectedAmount);
+                     userBalance += notificationAmountValue;
+                     amountStringForNotification = `+₦${notificationAmountValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                     
+                     // Update or add 'reversed' notification for the user
+                     if (userNotifIndex !== -1) {
+                         userNotifications[userNotifIndex].type = 'reversed'; // Mark as reversed for user
+                         userNotifications[userNotifIndex].data.amount = notificationAmountValue; // Ensure amount reflects credited value
+                         userNotifications[userNotifIndex].adminStatus = 'Settled'; // For admin's view if needed
+                         userNotifications[userNotifIndex].adminTimestamp = Date.now();
+                     } else { // If not found, create a new reversed notification for the user
+                          userNotifications.push({
+                             type: 'reversed',
+                             timestamp: Date.now(), // New timestamp for this event
+                             data: { ...transactionData, amount: notificationAmountValue },
+                             adminStatus: 'Settled',
+                             adminTimestamp: Date.now()
+                          });
+                     }
+                     console.log(`Confirmed pending deposit for user ${affectedUserPhone}. Added ${notificationAmountValue}. New balance: ${userBalance.toFixed(2)}`);
+
+                 } else if (originalNotificationTypeForLogic === 'failed') {
+                      notificationAmountValue = parseFloat(transactionData.amount || '0');
+                      userBalance += notificationAmountValue;
+                      amountStringForNotification = `+₦${notificationAmountValue.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+                      // Update or add 'reversed' notification for the user
+                      if (userNotifIndex !== -1) {
+                          userNotifications[userNotifIndex].type = 'reversed';
+                          userNotifications[userNotifIndex].data.amount = notificationAmountValue; // Ensure amount reflects refunded value
+                          userNotifications[userNotifIndex].adminStatus = 'Settled';
+                          userNotifications[userNotifIndex].adminTimestamp = Date.now();
+                      } else {
+                           userNotifications.push({
+                             type: 'reversed',
+                             timestamp: Date.now(),
+                             data: { ...transactionData, amount: notificationAmountValue },
+                             adminStatus: 'Settled',
+                             adminTimestamp: Date.now()
+                           });
+                      }
+                      console.log(`Confirmed failed transaction refund for user ${affectedUserPhone}. Added ${notificationAmountValue}. New balance: ${userBalance.toFixed(2)}`);
+                 } else {
+                     console.error(`Unknown notification type "${originalNotificationTypeForLogic}" for admin confirmation.`);
+                     return;
+                 }
+
+                localStorage.setItem(`user_data_${affectedUserPhone}_currentBalance`, userBalance.toFixed(2));
+                userNotifications.sort((a, b) => b.timestamp - a.timestamp); // Keep sorted
+                localStorage.setItem(`user_data_${affectedUserPhone}_simulatedNotifications`, JSON.stringify(userNotifications));
+
+                // Update the global list for admin's view
+                allSimulatedNotifications[targetNotificationIndex].adminStatus = 'Settled';
+                allSimulatedNotifications[targetNotificationIndex].adminTimestamp = Date.now();
+                // Optionally change type in global list too if it helps admin UI, or keep original type
+                // allSimulatedNotifications[targetNotificationIndex].type = 'reversed'; // If admin view should also show 'reversed'
+                localStorage.setItem('simulatedNotifications', JSON.stringify(allSimulatedNotifications));
+
+
+                // Trigger system notification for the affected user
+                if (showAppNotification) {
+                    showAppNotification(
+                        "Funds Credited",
+                        amountStringForNotification,
+                        allSimulatedNotifications[targetNotificationIndex].adminTimestamp, // Use admin action timestamp
+                        affectedUserPhone // Target the specific user
+                    );
+                }
+
+                 // Update the display for this specific transaction box on admin page
+                 updateTransactionBoxStatus(wrapperElement, 'Settled');
+             }
+
+             // Modified handleDecline to accept the wrapper element, timestamp and type
+             function handleDecline(wrapperElement, notificationTimestamp, notificationTypeOriginal) { // Renamed
+                 let allSimulatedNotifications = JSON.parse(localStorage.getItem('simulatedNotifications') || '[]');
+
+                 // Find the notification using the timestamp and type
+                 const targetNotificationIndex = allSimulatedNotifications.findIndex(
+                     notif => notif.timestamp === parseInt(notificationTimestamp, 10) && notif.type === notificationTypeOriginal
+                 );
+
+                 if (targetNotificationIndex === -1) {
+                      console.error(`Notification (type: ${notificationTypeOriginal}, timestamp: ${notificationTimestamp}) not found for decline.`);
+                      return;
+                 }
+                
+                const targetNotification = allSimulatedNotifications[targetNotificationIndex];
+                const affectedUserPhone = targetNotification.data.userPhone;
+
+                // Update user-specific notifications if user is identified
+                if (affectedUserPhone) {
+                    let userNotifications = JSON.parse(localStorage.getItem(`user_data_${affectedUserPhone}_simulatedNotifications`) || '[]');
+                    const userNotifIndex = userNotifications.findIndex(
+                        n => n.timestamp === targetNotification.timestamp && n.type === targetNotification.type
+                    );
+                    if (userNotifIndex !== -1) {
+                        // For declines, typically no balance change. User notification might be removed or marked differently.
+                        // For simplicity, let's assume 'declined' just updates admin view for now,
+                        // and doesn't create a new user-facing notification type unless specified.
+                        // userNotifications[userNotifIndex].status = 'DeclinedByAdmin'; // Or similar if needed
+                        // localStorage.setItem(`user_data_${affectedUserPhone}_simulatedNotifications`, JSON.stringify(userNotifications));
+                        console.log(`Transaction for user ${affectedUserPhone} declined by admin. User's notification list might need specific handling.`);
+                    }
+                }
+
+
+                 // Mark the notification as declined by admin in the global list
+                 allSimulatedNotifications[targetNotificationIndex].adminStatus = 'Declined'; 
+                 allSimulatedNotifications[targetNotificationIndex].adminTimestamp = Date.now();
+                 localStorage.setItem('simulatedNotifications', JSON.stringify(allSimulatedNotifications));
+
+                 // Update the display for this specific transaction box on admin page
+                 updateTransactionBoxStatus(wrapperElement, 'Declined');
+             }
+
+             // Function to update a specific transaction box display
+             function updateTransactionBoxStatus(wrapperElement, status) {
+                 const actionButtonsDiv = wrapperElement.querySelector('.action-buttons');
+                 if (actionButtonsDiv) {
+                     actionButtonsDiv.remove(); // Remove the buttons
+
+                     const statusIndicator = document.createElement('div');
+                     statusIndicator.classList.add('status-indicator', status.toLowerCase());
+                     statusIndicator.textContent = status;
+                     wrapperElement.appendChild(statusIndicator);
+
+                     // Update dataset on the wrapper
+                     wrapperElement.dataset.adminStatus = status;
+                     wrapperElement.dataset.adminTimestamp = Date.now(); // Store time of action
+
+                     // Re-sort and re-display the whole list to move settled/declined items to the bottom
+                     displayPendingTransactions();
+                 }
+             }
+
+
+            // Set the finance icon as active initially
+            function setActiveAdminNavItem(activeItem) {
+                adminBottomNavItems.forEach(item => item.classList.remove('active'));
+                activeItem.classList.add('active');
+            }
+            setActiveAdminNavItem(adminNavFinance);
+
+            // Add event listeners for bottom navigation
+            adminBottomNavItems.forEach(item => {
+                 item.addEventListener('click', function() {
+                     // Visually activate the clicked item
+                     adminBottomNavItems.forEach(navItem => navItem.classList.remove('active'));
+                     this.classList.add('active');
+
+                     if (this.id === 'admin-nav-customer-service') {
+                         console.log('Admin Customer Service icon clicked. Redirecting to admin page.');
+                         window.location.href = 'admin.html';
+
+                     } else if (this.id === 'admin-nav-finance') {
+                         console.log('Admin Finance icon clicked (current page).');
+                         // Already on this page, maybe re-render or do nothing
+                         displayPendingTransactions(); // Re-render to ensure fresh list
+                     } else if (this.id === 'admin-nav-communication') {
+                         console.log('Admin Communication icon clicked. Redirecting to add user page.');
+                         window.location.href = 'admin_add_user.html';
+                     }
+                 });
+             });
+
+
+            // Initial display of pending and failed transactions
+            displayPendingTransactions();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palmpay beta 2025</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        // Apply immediately so splash screen can use it
+        applyUserDarkModePreference();
+    </script>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="https://upload.pinnocent.com/assets/files/upload-1746004279.jpeg" alt="Palmpay Logo" class="splash-logo">
+        <div class="splash-text">PalmPay Beta</div>
+    </div>
+
+    <!-- Main Content Wrapper (initially hidden) -->
+    <div id="content-wrapper" class="hidden">
+        <!-- Phone Input Section -->
+        <div class="phone-input-container">
+            <label class="phone-label">Phone number</label>
+            <div class="phone-number-wrapper">
+                <span class="country-code">+234</span>
+                <input type="tel" class="phone-number-input" maxlength="10" pattern="[0-9]{10}" placeholder="mobile number" inputmode="numeric">
+            </div>
+        </div>
+
+        <!-- Password Input Section -->
+        <div class="password-input-container">
+            <label class="password-label">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password-input" class="password-input" maxlength="6" pattern="[0-9]{6}" placeholder="password contains 6 characters" inputmode="numeric">
+            </div>
+        </div>
+
+        <!-- Login Button -->
+        <button id="login-button" class="login-button hidden">Login</button>
+
+        <!-- Create Account Link -->
+        <div id="create-account-link" class="create-account-link">Create account</div>
+
+    </div>
+
+    <!-- Support Overlay (currently unused on this page) -->
+    <div id="support-overlay" class="support-overlay hidden">
+        <div class="support-content">
+            <div id="contact-support-header" class="contact-support-header">Contact Support</div>
+            <div id="user-message-display" class="user-message-display"></div>
+            <div class="input-container">
+                <input type="text" id="support-input" class="support-input" placeholder="Type your message here">
+                <span id="send-icon" class="send-icon hidden">&#x27A2;</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timeoutId;
+
+        // This function now clears only the *global* session data, leaving user-specific data intact.
+        function clearGlobalSessionData() {
+            localStorage.removeItem('currentUserPhone'); // Clear the indicator of the currently logged-in user
+            localStorage.removeItem('isAdmin'); // Ensure isAdmin is cleared
+            // NOTE: adminAddedUsers and supportRequests are NOT cleared here as they should persist globally.
+            // NOTE: 'initialSetupDone' flag is also not cleared here as it tracks first-time *browser* setup state.
+            // User-specific data like user_data_PHONE_... remains.
+        }
+
+        // This function seems unused, but update it defensively to match new structure if it were called.
+        function resetBackgroundAndShowContent() {
+            console.log("Resetting background and showing content (simulated reset)");
+            // Hide content wrapper
+            document.getElementById('content-wrapper').classList.remove('visible');
+            document.getElementById('content-wrapper').classList.add('hidden');
+            document.body.classList.remove('loaded'); // Revert body layout
+
+            // Show splash screen
+            document.getElementById('splash-screen').classList.remove('hidden');
+
+            // Clear any existing timeout and set a new one
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                console.log("Timeout finished, showing content again");
+                // Hide splash screen
+                document.getElementById('splash-screen').classList.add('hidden');
+                // Show content wrapper
+                const contentWrapper = document.getElementById('content-wrapper');
+                contentWrapper.classList.remove('hidden');
+                contentWrapper.classList.add('visible');
+                // Add loaded class for main layout
+                document.body.classList.add('loaded');
+            }, 5000); // 5 seconds for the splash
+        }
+
+        // Initial page load logic: Show splash for 5 seconds, then show content
+        setTimeout(() => {
+            console.log("Initial splash screen timeout finished");
+            // Hide the splash screen
+            document.getElementById('splash-screen').classList.add('hidden');
+            // Show the content wrapper
+            const contentWrapper = document.getElementById('content-wrapper');
+            contentWrapper.classList.remove('hidden'); // Ensure display flex/block is applied
+            contentWrapper.classList.add('visible');
+            // Add loaded class to body for layout adjustments (like padding-top for the fixed header)
+            document.body.classList.add('loaded');
+
+        }, 5000); // 5000 milliseconds = 5 seconds
+
+        // Existing login input handling and button visibility logic
+        const phoneInput = document.querySelector('.phone-number-input');
+        const passwordInput = document.getElementById('password-input');
+        const loginButton = document.getElementById('login-button');
+
+        function checkInputs() {
+            // Use 10 digits for phone number, 6 for password based on input attributes
+            const isPhoneValid = phoneInput.value.length === 10;
+            const isPasswordValid = passwordInput.value.length === 6;
+
+            if (isPhoneValid && isPasswordValid) {
+                // Use the specific visible-button class for the login button
+                loginButton.classList.remove('hidden');
+                loginButton.classList.add('visible-button');
+
+            } else {
+                loginButton.classList.add('hidden');
+                loginButton.classList.remove('visible-button');
+            }
+        }
+
+        phoneInput.addEventListener('input', checkInputs);
+        passwordInput.addEventListener('input', checkInputs);
+
+        // Initial check in case fields are pre-filled (unlikely but good practice)
+        checkInputs();
+
+        loginButton.addEventListener('click', function() {
+            const enteredPhoneNumber = phoneInput.value;
+            const enteredPassword = passwordInput.value;
+            
+            // --- Login Logic ---
+
+            // 1. Check for User login
+             const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+             const matchedUser = adminAddedUsers.find(user => user.phone === enteredPhoneNumber && user.password === enteredPassword);
+
+             if (matchedUser) {
+                 console.log(`User ${enteredPhoneNumber} login successful.`);
+                 clearGlobalSessionData(); // Clear any previous user session
+
+                 // Set the currently logged-in user's phone number globally
+                 localStorage.setItem('currentUserPhone', enteredPhoneNumber); // This phone number is the User ID
+                 // Ensure isAdmin is explicitly false or removed (as admin login is gone)
+                 localStorage.setItem('isAdmin', 'false');
+
+
+                 // --- User-Specific Data Loading ---
+                     // Key for tracking if this user has done their initial setup in *this browser* for this account
+                     const userSpecificInitialSetupDoneKey = `user_data_${enteredPhoneNumber}_initialSetupDone`;
+                     const userInitialSetupDone = localStorage.getItem(userSpecificInitialSetupDoneKey) === 'true';
+
+                     // If this user hasn't had initial setup done (meaning this is their first login *ever* in this browser for this account)
+                     if (!userInitialSetupDone) {
+                          console.log(`First login for user ${enteredPhoneNumber} in this browser session, applying initial setup.`);
+                         // Apply initial setup data including the welcome bonus
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_userFirstName`, 'New'); // Default name
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_userFullName`, 'New User'); // Default full name
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_currentBalance`, '5000.00'); // Welcome bonus
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_balanceVisible`, 'true'); // Default balance visibility
+                         // User-specific notifications should be stored under their key
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_simulatedNotifications`, JSON.stringify([])); // Initialize as empty array string
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_savedBeneficiaries`, JSON.stringify([])); // Initialize as empty array string
+                         localStorage.setItem(`user_data_${enteredPhoneNumber}_password`, enteredPassword); // Store user's own password
+                         localStorage.removeItem(`user_data_${enteredPhoneNumber}_lastPasswordChangeTimestamp`); // No recent password change
+                         localStorage.removeItem(`user_data_${enteredPhoneNumber}_profilePictureDataUrl`); // No profile picture
+
+                         // Set the user-specific flag so the bonus isn't given again for this user in this browser
+                         localStorage.setItem(userSpecificInitialSetupDoneKey, 'true');
+                     } else {
+                         console.log(`Initial setup already done for user ${enteredPhoneNumber}. Loading existing user data.`);
+                         // Ensure notifications and beneficiaries are at least an empty array if not set
+                         if (!localStorage.getItem(`user_data_${enteredPhoneNumber}_simulatedNotifications`)) {
+                            localStorage.setItem(`user_data_${enteredPhoneNumber}_simulatedNotifications`, JSON.stringify([]));
+                         }
+                         if (!localStorage.getItem(`user_data_${enteredPhoneNumber}_savedBeneficiaries`)) {
+                            localStorage.setItem(`user_data_${enteredPhoneNumber}_savedBeneficiaries`, JSON.stringify([]));
+                         }
+                     }
+
+                     window.location.href = 'balance.html';
+                     return; // Stop further checks
+                 }
+            // 2. If no user login is successful
+            alert("Invalid phone number or password");
+
+
+        });
+
+        const createAccountLink = document.getElementById('create-account-link');
+        createAccountLink.addEventListener('click', function() {
+            console.log("Create account link clicked. Navigating to create_account.html");
+            window.location.href = 'create_account.html';
+        });
+
+        // Clear global session data on index page load, preparing for a new login
+        clearGlobalSessionData();
+    </script>
+</body>
+</html>

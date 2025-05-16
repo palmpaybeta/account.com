@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Amount</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            box-sizing: border-box;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 220px;
+        }
+
+        .header {
+            background-color: #FFFFFF !important;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header.transfer_amount_page_header {
+            background-color: #FFFFFF !important;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-title {
+            font-size: 18px;
+            margin: 0 auto;
+            font-weight: normal;
+            padding-right: 30px;
+        }
+
+        .recipient-info-box {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 20px 15px;
+            padding: 15px 20px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        .recipient-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .recipient-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .amount-details-box {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 20px 15px;
+            padding: 15px 20px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        .amount-input-wrapper {
+            display: flex;
+            align-items: baseline;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .naira-symbol {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        #amountInput {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 1.8em;
+            background-color: transparent;
+            padding: 5px 0;
+            caret-color: transparent;
+            text-align: left;
+        }
+
+        #amountInput::placeholder {
+            color: #ccc;
+            font-size: 0.7em;
+            text-align: left;
+        }
+
+        .balance-display {
+            font-size: 0.9em;
+            color: #999;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+
+        #descriptionInput {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 1em;
+            background-color: transparent;
+            padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+            margin-top: 10px;
+        }
+
+        #descriptionInput::placeholder {
+            color: #aaa;
+        }
+
+        #customKeyboard {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e0e0e0;
+            padding: 10px 5px;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            z-index: 200;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        #customKeyboard.hidden {
+            display: none;
+        }
+
+        .keyboard-button {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px 0;
+            font-size: 1.4em;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: background-color 0.1s ease;
+        }
+
+        .keyboard-button:active {
+            background-color: #f0f0f0;
+        }
+
+        .keyboard-button.backspace {
+            font-size: 1.4em;
+        }
+
+        .keyboard-button.backspace svg {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+        }
+
+        #confirmTransferButton {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: calc(100% - 40px);
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+        }
+
+        #confirmTransferButton.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #confirmTransferButton:hover:not(.visible) {
+             background-color: #AE00FF;
+        }
+
+        #confirmTransferButton:hover.visible {
+             background-color: #9000cc;
+        }
+
+        #paymentConfirmationSlider {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 90vh;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 300;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: hidden;
+        }
+
+        #paymentConfirmationSlider.active {
+            transform: translateY(calc(100% - var(--slider-height, 80vh)));
+        }
+
+        .slider-close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            z-index: 310;
+        }
+
+        .slider-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            width: 100%;
+            padding-top: 10px;
+        }
+
+        .slider-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #6466FF;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        #transferDetailsBox {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #f9f9f9;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .amount-black {
+            color: #333;
+            font-weight: bold;
+        }
+
+        #detailsFee {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .stroked {
+            text-decoration: line-through;
+            color: #888;
+            margin-right: 5px;
+        }
+
+        #actualFee {
+            color: #333;
+            font-weight: bold;
+        }
+
+        #safeguardBox {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        #safeguardBox .safeguard-header {
+            font-weight: bold;
+            color: blue;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        #safeguardBox .safeguard-text {
+             font-size: 0.8em;
+             color: #555;
+             line-height: 1.4;
+         }
+
+        #safeguardBox .safeguard-free {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-weight: bold;
+            color: green;
+            font-size: 0.9em;
+        }
+
+        #paymentMethodRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px dashed #eee;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            font-size: 1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        #paymentMethodRow .method-label {
+            font-weight: bold;
+        }
+
+        #paymentMethodRow .method-value {
+            color: #333;
+        }
+
+        #confirmToPayButton {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        #confirmToPayButton:hover {
+             background-color: #9000cc;
+        }
+
+        #paymentConfirmationSlider .slider-content-wrapper {
+            width: 100%;
+            max-width: 400px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            flex-grow: 1;
+            margin-top: 0;
+            padding-bottom: 15px;
+        }
+
+        #paymentConfirmationSlider #confirmToPayButton {
+            position: static;
+            transform: none;
+            margin-top: 20px;
+            margin-bottom: 0;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        #pinInputSlider {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 65vh;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 400;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: hidden;
+        }
+
+        #pinInputSlider.active {
+            transform: translateY(calc(100% - var(--pin-slider-height, 65vh)));
+        }
+        
+        #pinInputSlider .slider-close-button {
+             position: absolute;
+             top: 15px;
+             right: 15px;
+             font-size: 24px;
+             cursor: pointer;
+             color: #666;
+             z-index: 410;
+         }
+
+        #pinInputSlider .slider-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            width: 100%;
+            padding-top: 10px;
+        }
+
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .pin-input-box {
+            width: 40px;
+            height: 50px;
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .secure-message {
+            display: flex;
+            align-items: center;
+            color: #555;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .secure-message .ph-shield {
+            font-size: 1.5em;
+            margin-right: 5px;
+            color: #AE00FF; 
+        }
+
+        #pinInputSlider .slider-content-wrapper {
+            width: 100%;
+            max-width: 400px;
+            overflow-y: hidden;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="container">
+        <div class="header transfer_amount_page_header"> 
+            <a href="transfer_to_bank.html" style="font-size: 1.5em; color: #000; text-decoration: none; position: absolute; left: 20px;">&larr;</a>
+            <h1 class="header-title">Transfer in Progress</h1>
+        </div>
+
+        <div class="recipient-info-box">
+            <div id="recipientName" class="recipient-name">Recipient Name</div>
+            <div class="recipient-details">
+                <span id="accountNumber">Account Number</span>
+                <span id="bankName">Bank Name</span>
+            </div>
+        </div>
+
+        <div class="amount-details-box">
+            <div class="amount-input-wrapper">
+                <span class="naira-symbol">₦</span>
+                <input type="text" id="amountInput" placeholder="10-500,000" readonly>
+            </div>
+            <div class="balance-display">Balance <span id="currentBalance">₦0.00</span></div>
+            <input type="text" id="descriptionInput" placeholder="What's this for? (Not Optional)">
+        </div>
+
+        <button id="confirmTransferButton">Next</button>
+    </div>
+
+    <div id="customKeyboard" class="hidden">
+        <button class="keyboard-button" data-value="1">1</button>
+        <button class="keyboard-button" data-value="2">2</button>
+        <button class="keyboard-button" data-value="3">3</button>
+        <button class="keyboard-button" data-value="4">4</button>
+        <button class="keyboard-button" data-value="5">5</button>
+        <button class="keyboard-button" data-value="6">6</button>
+        <button class="keyboard-button" data-value="7">7</button>
+        <button class="keyboard-button" data-value="8">8</button>
+        <button class="keyboard-button" data-value="9">9</button>
+        <button class="keyboard-button" data-value="00">00</button>
+        <button class="keyboard-button" data-value="0">0</button>
+        <button class="keyboard-button backspace" data-value="backspace">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="paymentConfirmationSlider">
+        <span class="slider-close-button">&times;</span>
+        <div class="slider-header">payment</div>
+        <div id="sliderAmount" class="slider-amount">₦0.00</div>
+
+        <div class="slider-content-wrapper">
+            <div id="transferDetailsBox">
+                <div class="detail-row">
+                    <span>Amount</span>
+                    <span id="detailsAmount" class="amount-black">₦0.00</span>
+                </div>
+                <div class="detail-row">
+                    <span>Fee</span>
+                    <div id="detailsFee">
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <span>Account number</span>
+                    <span id="detailsAccountNumber"></span>
+                </div>
+                <div class="detail-row">
+                    <span>Name</span>
+                    <span id="detailsRecipientName"></span>
+                </div>
+            </div>
+
+            <div id="safeguardBox">
+                <span class="safeguard-free">Free</span>
+                <span class="safeguard-header">Fast transfer safeguard</span>
+                <span class="safeguard-text">Eligible for an advanced refund to safeguard your funds in rare cases of delay</span>
+            </div>
+
+            <div id="paymentMethodRow">
+                 <span class="method-label">Payment method</span>
+                 <span class="method-value">balance</span>
+            </div>
+            <button id="confirmToPayButton">Confirm to Pay</button>
+        </div>
+    </div>
+
+    <div id="pinInputSlider" class="hidden">
+        <span class="slider-close-button">&times;</span>
+        <div class="slider-header">Input pin to pay</div>
+        <div class="slider-content-wrapper">
+            <div class="pin-input-container">
+                <div class="pin-input-box"></div>
+                <div class="pin-input-box"></div>
+                <div class="pin-input-box"></div>
+                <div class="pin-input-box"></div>
+            </div>
+            <div class="secure-message">
+                <i class="ph-shield"></i>
+                <span>Secure pin mode active</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const recipientNameDisplay = document.getElementById('recipientName');
+            const accountNumberDisplay = document.getElementById('accountNumber');
+            const bankNameDisplay = document.getElementById('bankName');
+            const amountInput = document.getElementById('amountInput');
+            const descriptionInput = document.getElementById('descriptionInput');
+            const currentBalanceDisplay = document.getElementById('currentBalance');
+            const customKeyboard = document.getElementById('customKeyboard');
+            const keyboardButtons = document.querySelectorAll('.keyboard-button');
+            const nextButton = document.getElementById('confirmTransferButton');
+            const paymentConfirmationSlider = document.getElementById('paymentConfirmationSlider');
+            const sliderCloseButton = paymentConfirmationSlider.querySelector('.slider-close-button');
+            const sliderAmountDisplay = document.getElementById('sliderAmount');
+            const detailsAmountSpan = document.getElementById('detailsAmount');
+            const detailsFeeDiv = document.getElementById('detailsFee');
+            const actualFeeSpan = document.getElementById('actualFee');
+            const detailsAccountNumberSpan = document.getElementById('detailsAccountNumber');
+            const detailsRecipientNameSpan = document.getElementById('detailsRecipientName');
+            const confirmToPayButton = document.getElementById('confirmToPayButton');
+            const sliderContentWrapper = document.querySelector('#paymentConfirmationSlider .slider-content-wrapper');
+
+            const pinInputSlider = document.getElementById('pinInputSlider');
+            const pinInputBoxes = pinInputSlider.querySelectorAll('.pin-input-box');
+            const pinSliderCloseButton = pinInputSlider.querySelector('.slider-close-button');
+
+            const recipientName = localStorage.getItem('transferRecipientName');
+            const accountNumber = localStorage.getItem('transferAccountNumber');
+            const bankName = localStorage.getItem('transferBankName');
+
+            if (recipientName) {
+                recipientNameDisplay.textContent = recipientName;
+                detailsRecipientNameSpan.textContent = recipientName;
+            }
+            if (accountNumber) {
+                accountNumberDisplay.textContent = accountNumber;
+                detailsAccountNumberSpan.textContent = accountNumber;
+            }
+            if (bankName) {
+                bankNameDisplay.textContent = bankName;
+            }
+
+            const balance = localStorage.getItem(`user_data_${localStorage.getItem('currentUserPhone')}_currentBalance`) || '0.00';
+            currentBalanceDisplay.textContent = `₦${parseFloat(balance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            const showAppNotification = window.showAppNotification;
+
+            amountInput.addEventListener('click', (e) => {
+                 e.preventDefault();
+                 amountInput.focus();
+                 customKeyboard.classList.remove('hidden');
+                 pinInputSlider.classList.add('hidden');
+                 pinInputSlider.classList.remove('active');
+                 paymentConfirmationSlider.classList.remove('active');
+                 nextButton.classList.remove('visible');
+             });
+
+            descriptionInput.addEventListener('focus', () => {
+                customKeyboard.classList.add('hidden');
+                checkAmountForButton();
+            });
+
+             document.addEventListener('click', (event) => {
+                const isClickInsideAmountInput = amountInput.contains(event.target);
+                const isClickInsideDescriptionInput = descriptionInput.contains(event.target);
+                const isClickInsideKeyboard = customKeyboard.contains(event.target);
+                const isClickInsidePaymentSlider = paymentConfirmationSlider.contains(event.target);
+                const isClickInsidePinSlider = pinInputSlider.contains(event.target);
+                const isClickOnNextButton = nextButton.contains(event.target);
+                 const isClickOnConfirmButton = confirmToPayButton.contains(event.target);
+
+
+                if (!isClickInsideAmountInput && !isClickInsideDescriptionInput && !isClickInsideKeyboard && !isClickInsidePaymentSlider && !isClickInsidePinSlider && !isClickOnNextButton && !isClickOnConfirmButton) {
+                    customKeyboard.classList.add('hidden');
+                    paymentConfirmationSlider.classList.remove('active');
+                    if (pinInputSlider.classList.contains('active')) {
+                         pinInputSlider.classList.remove('active');
+                         checkAmountForButton();
+                         pinInputBoxes.forEach(box => box.textContent = '');
+                         pinInputBoxes.forEach(box => box.classList.remove('error'));
+                    } else {
+                         checkAmountForButton();
+                    }
+                }
+            });
+
+            function formatAmountInput(value) {
+                const rawValue = value.replace(/,/g, '');
+                 if (rawValue === '') {
+                     return '';
+                 }
+                 // Allow only digits
+                 if (!/^\d*$/.test(rawValue)) {
+                     return formatAmountInput(rawValue.replace(/\D/g, ''));
+                 }
+
+                let numericValue = parseInt(rawValue, 10);
+                 if (isNaN(numericValue)) {
+                     // If it was just '0' and backspace, return empty
+                     if (rawValue === '') return '';
+                     // Otherwise, try to format the valid part
+                      return formatAmountInput(rawValue.slice(0, -1));
+                 }
+
+                 if (numericValue > 500000) {
+                     numericValue = 500000;
+                 }
+
+                 // Handle leading zeros unless the value is just '0'
+                 if (rawValue.length > 1 && rawValue.startsWith('0')) {
+                     numericValue = parseInt(rawValue, 10); // Re-parse to remove leading zeros
+                     if (isNaN(numericValue)) numericValue = 0; // Handle case like '00' becoming NaN after parse
+                 }
+
+
+                return numericValue.toLocaleString('en-US');
+            }
+
+            function checkAmountForButton() {
+                const rawAmount = amountInput.value.replace(/,/g, '');
+                const numericAmount = parseFloat(rawAmount);
+                 // The prompt now says to make the button visible if amount is >= 10, regardless of description
+                if (!isNaN(numericAmount) && numericAmount >= 10 && !paymentConfirmationSlider.classList.contains('active') && !pinInputSlider.classList.contains('active')) {
+                    nextButton.classList.add('visible');
+                } else {
+                    nextButton.classList.remove('visible');
+                }
+            }
+
+             keyboardButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const value = button.dataset.value;
+
+                    if (paymentConfirmationSlider.classList.contains('active')) {
+                         return;
+                    }
+
+                    if (pinInputSlider.classList.contains('active')) {
+                        let currentPin = '';
+                        pinInputBoxes.forEach(box => currentPin += box.textContent);
+
+                        if (value === 'backspace') {
+                            if (currentPin.length > 0) {
+                                currentPin = currentPin.slice(0, -1);
+                                 pinInputBoxes[currentPin.length].textContent = '';
+                            }
+                        } else {
+                             const digit = value.replace(/\D/g, '');
+                            if (digit.length > 0 && currentPin.length < 4) {
+                                pinInputBoxes[currentPin.length].textContent = digit[0];
+                                currentPin += digit[0];
+                                if (currentPin.length === 4) {
+                                    const storedPassword = localStorage.getItem('password') || '191919';
+                                    // The correct PIN is the first 4 digits of the 6-digit password
+                                    const correctPin = storedPassword.substring(0, 4);
+
+                                    if (currentPin === correctPin) {
+                                        console.log("PIN correct! Processing transfer...");
+                                        const rawAmount = amountInput.value.replace(/,/g, '');
+                                        const transferAmount = parseFloat(rawAmount);
+                                        const currentUserPhone = localStorage.getItem('currentUserPhone');
+                                        let currentBalance = parseFloat(localStorage.getItem(`user_data_${currentUserPhone}_currentBalance`) || '0.00');
+
+                                        const bankNameForFee = localStorage.getItem('transferBankName');
+                                        let actualFee = 0;
+                                        if (bankNameForFee !== 'Palmpay') {
+                                            if (transferAmount < 1000) actualFee = 10;
+                                            else if (transferAmount >= 1000 && transferAmount < 10000) actualFee = 100;
+                                            else if (transferAmount >= 10000) actualFee = 1000;
+                                        }
+                                        const totalDeduction = transferAmount + actualFee;
+
+                                        if (totalDeduction <= currentBalance) {
+                                            const newBalance = (currentBalance - totalDeduction).toFixed(2);
+                                            localStorage.setItem(`user_data_${currentUserPhone}_currentBalance`, newBalance);
+
+                                            const completedTransferData = {
+                                                amount: transferAmount,
+                                                recipient: recipientName,
+                                                account: accountNumber,
+                                                bank: bankName,
+                                                timestamp: Date.now(),
+                                                description: descriptionInput.value.trim() || 'Transfer'
+                                            };
+                                            const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+                                            userSimulatedNotifications.push({
+                                                type: 'completed',
+                                                timestamp: completedTransferData.timestamp,
+                                                data: completedTransferData
+                                            });
+                                            localStorage.setItem(`user_data_${currentUserPhone}_simulatedNotifications`, JSON.stringify(userSimulatedNotifications));
+
+                                            // Trigger system notification for successful transfer (sender)
+                                            if (showAppNotification) {
+                                                showAppNotification(
+                                                    "Successful Transaction",
+                                                    `-₦${transferAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                                    completedTransferData.timestamp,
+                                                    currentUserPhone // For current user (sender)
+                                                );
+                                            }
+
+                                            // If transfer is to another Palmpay user, create an 'incoming_transfer' notification for them
+                                            const recipientPhoneNumber = localStorage.getItem('transferAccountNumber');
+                                            const recipientBankName = localStorage.getItem('transferBankName');
+                                            if (recipientBankName === 'Palmpay') {
+                                                const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+                                                const recipientIsPalmpayUser = adminAddedUsers.some(user => user.phone === recipientPhoneNumber);
+
+                                                if (recipientIsPalmpayUser) {
+                                                    const senderFullName = localStorage.getItem(`user_data_${currentUserPhone}_userFullName`);
+                                                    const senderFirstName = localStorage.getItem(`user_data_${currentUserPhone}_userFirstName`);
+                                                    const senderDisplayName = senderFullName || senderFirstName || currentUserPhone;
+                                                    const incomingTimestamp = Date.now(); // Separate timestamp for recipient's event
+
+                                                    let recipientNotifications = JSON.parse(localStorage.getItem(`user_data_${recipientPhoneNumber}_simulatedNotifications`) || '[]');
+                                                    recipientNotifications.push({
+                                                        type: 'incoming_transfer',
+                                                        timestamp: incomingTimestamp,
+                                                        recipientPhone: recipientPhoneNumber,
+                                                        data: {
+                                                            amount: transferAmount,
+                                                            senderName: senderDisplayName,
+                                                            senderPhone: currentUserPhone
+                                                        }
+                                                    });
+                                                    localStorage.setItem(`user_data_${recipientPhoneNumber}_simulatedNotifications`, JSON.stringify(recipientNotifications));
+                                                    console.log(`Created incoming_transfer notification for ${recipientPhoneNumber}`);
+
+                                                    // Trigger system notification for "Transfer Received" if recipient is current user (for demo)
+                                                    // or for the actual recipient.
+                                                    if (showAppNotification) {
+                                                        showAppNotification(
+                                                            "Transfer Received",
+                                                            `+₦${transferAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                                                            incomingTimestamp,
+                                                            recipientPhoneNumber // Target the recipient
+                                                        );
+                                                    }
+                                                }
+                                            }
+
+                                            // Remove any PENDING_DEPOSIT notification for the CURRENT USER
+                                            const updatedUserNotifications = userSimulatedNotifications.filter(
+                                                notif => notif.type !== 'pending_deposit'
+                                            );
+                                            localStorage.setItem(`user_data_${currentUserPhone}_simulatedNotifications`, JSON.stringify(updatedUserNotifications));
+                                            // localStorage.removeItem('pendingTransaction');
+
+                                            localStorage.setItem('lastTransferredAmount', transferAmount);
+                                            console.log("Transfer successful. Redirecting to success page.");
+                                            window.location.href = 'transfer_success.html';
+                                        } else {
+                                            console.log("Insufficient balance.");
+                                            alert("Insufficient balance");
+                                             pinInputBoxes.forEach(box => {
+                                                 box.textContent = '';
+                                                 box.classList.remove('error');
+                                             });
+                                             pinInputSlider.classList.remove('active');
+                                             customKeyboard.classList.add('hidden');
+                                             checkAmountForButton();
+                                        }
+
+                                    } else {
+                                        console.log("PIN incorrect.");
+                                         pinInputBoxes.forEach(box => box.classList.add('error'));
+                                        setTimeout(() => {
+                                            pinInputBoxes.forEach(box => {
+                                                box.textContent = '';
+                                                 box.classList.remove('error');
+                                            });
+                                        }, 500);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        let currentAmountStr = amountInput.value.replace(/,/g, '');
+
+                        if (value === 'backspace') {
+                            currentAmountStr = currentAmountStr.slice(0, -1);
+                             if (currentAmountStr === '') {
+                                amountInput.value = '';
+                             } else {
+                                amountInput.value = formatAmountInput(currentAmountStr);
+                             }
+                        } else {
+                             const newValue = currentAmountStr + value.replace(/\D/g, '');
+                             if (parseInt(newValue, 10) > 500000) {
+                                 currentAmountStr = '500000';
+                             } else if (currentAmountStr === '0' && value !== 'backspace') {
+                                 currentAmountStr = value === '00' ? '0' : newValue;
+                             } else if (currentAmountStr === '' && value === '00') {
+                                 currentAmountStr = '0';
+                             }
+                             else {
+                                 currentAmountStr = newValue;
+                             }
+                             amountInput.value = formatAmountInput(currentAmountStr);
+                        }
+                        checkAmountForButton();
+                    }
+                });
+            });
+
+            amountInput.addEventListener('input', checkInputs);
+            descriptionInput.addEventListener('input', checkInputs);
+
+            nextButton.addEventListener('click', () => {
+                if (!nextButton.classList.contains('visible')) {
+                    return;
+                }
+                const amount = amountInput.value;
+                const rawNumericAmount = parseFloat(amount.replace(/,/g, ''));
+
+                if (rawNumericAmount < 10) {
+                     alert("Minimum transfer amount is ₦10.");
+                     return;
+                }
+
+                const formattedAmount = rawNumericAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                sliderAmountDisplay.textContent = `₦${formattedAmount}`;
+                detailsAmountSpan.textContent = `₦${formattedAmount}`;
+
+                // Calculate STROKED fee based on the new rules from the prompt
+                let strokedFee = 0;
+                 // Only calculate stroked fee if it's not a Palmpay transfer
+                const transferBankName = localStorage.getItem('transferBankName');
+                if (transferBankName !== 'Palmpay') {
+                    if (rawNumericAmount < 1000) {
+                        strokedFee = 10;
+                    } else if (rawNumericAmount >= 1000 && rawNumericAmount < 10000) {
+                        strokedFee = 100;
+                    } else if (rawNumericAmount >= 10000) {
+                        strokedFee = 1000;
+                    }
+                }
+
+                const actualFee = 0; 
+
+                detailsFeeDiv.innerHTML = ''; 
+
+                if (strokedFee > 0) {
+                     const strokedSpan = document.createElement('span');
+                     strokedSpan.classList.add('stroked');
+                     strokedSpan.textContent = `₦${strokedFee.toLocaleString('en-NG')}`;
+                     detailsFeeDiv.appendChild(strokedSpan);
+                 } else {
+                      // If no stroked fee (e.g., Palmpay transfer), ensure the stroked span area is empty
+                 }
+
+                const actualSpan = document.createElement('span');
+                actualSpan.textContent = `₦${actualFee.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                actualSpan.style.color = '#333';
+                actualSpan.style.fontWeight = 'bold';
+                detailsFeeDiv.appendChild(actualSpan);
+
+                paymentConfirmationSlider.classList.add('active');
+                customKeyboard.classList.add('hidden');
+                nextButton.classList.remove('visible'); 
+
+            });
+
+            sliderCloseButton.addEventListener('click', () => {
+                paymentConfirmationSlider.classList.remove('active');
+                 checkAmountForButton(); 
+            });
+
+            confirmToPayButton.addEventListener('click', () => {
+                 pinInputBoxes.forEach(box => box.textContent = '');
+                 pinInputBoxes.forEach(box => box.classList.remove('error'));
+
+                pinInputSlider.classList.remove('hidden');
+                pinInputSlider.classList.add('active');
+                paymentConfirmationSlider.classList.remove('active');
+                customKeyboard.classList.remove('hidden'); 
+                 nextButton.classList.remove('visible'); 
+            });
+
+            pinSliderCloseButton.addEventListener('click', () => {
+                pinInputSlider.classList.remove('active');
+                 pinInputBoxes.forEach(box => box.textContent = '');
+                 pinInputBoxes.forEach(box => box.classList.remove('error'));
+                 customKeyboard.classList.add('hidden'); 
+                 checkAmountForButton(); 
+            });
+
+            function checkInputs() {
+                checkAmountForButton();
+            }
+
+            checkInputs();
+        });
+    </script>
+</body>
+</html>

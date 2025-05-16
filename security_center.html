@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Center</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .security-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            background-color: #f0f0f0;
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .security-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+            position: absolute;
+            left: 20px;
+        }
+
+        .security-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 auto;
+        }
+
+        /* New style for User ID display */
+        .user-id-display {
+            position: absolute;
+            top: 20px; /* Adjust as needed */
+            right: 20px; /* Adjust as needed */
+            font-size: 0.9em;
+            color: #555;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .security-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+
+        .user-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #AE00FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 36px;
+            margin-bottom: 20px;
+            cursor: pointer; 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            overflow: hidden; 
+        }
+
+        .user-circle span {
+             display: block;
+             width: 100%;
+             height: 100%;
+             text-align: center;
+             line-height: 80px; 
+             color: white; 
+        }
+
+        .user-circle.has-picture span {
+             color: transparent; 
+        }
+
+
+        .user-name-display {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .change-password-button {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.1em;
+            text-align: left;
+            color: #333;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .change-password-button:hover {
+            background-color: #eee;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #timeoutMessage {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1001;
+            display: none;
+            white-space: nowrap;
+        }
+        #timeoutMessage.visible {
+             display: block;
+         }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="security-header security_center_page_header"> 
+        <a href="profile.html" class="back-link">&larr;</a>
+        <h1 class="header-title">Security Center</h1>
+    </div>
+    <!-- User ID Display -->
+    <div id="userIdDisplay" class="user-id-display">ID=N/A</div>
+
+    <div class="security-content">
+        <div id="userCircle" class="user-circle">
+            <span id="first-initial">U</span>
+        </div>
+         <!-- Hidden file input -->
+        <input type="file" id="profilePictureInput" accept="image/*" class="hidden">
+
+        <div id="userNameDisplay" class="user-name-display">User Name</div>
+        <div id="changePasswordButton" class="change-password-button">Change password</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const firstInitialSpan = document.getElementById('first-initial');
+            const changePasswordButton = document.getElementById('changePasswordButton');
+            const userCircle = document.getElementById('userCircle'); 
+            const profilePictureInput = document.getElementById('profilePictureInput'); 
+            const userIdDisplay = document.getElementById('userIdDisplay'); // Get the new ID display element
+
+            const currentUserPhone = localStorage.getItem('currentUserPhone'); // This is the User ID
+            const userFullName = localStorage.getItem(`user_data_${currentUserPhone}_userFullName`);
+            const userFirstName = localStorage.getItem(`user_data_${currentUserPhone}_userFirstName`);
+
+            // Display User ID
+            if (currentUserPhone) {
+                userIdDisplay.textContent = `ID=${currentUserPhone}`;
+            }
+
+            let displayedName = userFullName || userFirstName || currentUserPhone || "User";
+            userNameDisplay.textContent = displayedName;
+            if (firstInitialSpan) { // Check if element exists, though it should
+                 firstInitialSpan.textContent = displayedName.charAt(0).toUpperCase();
+            }
+
+            const loadProfilePicture = () => {
+                const dataUrl = localStorage.getItem(`user_data_${currentUserPhone}_profilePictureDataUrl`);
+                if (dataUrl) {
+                    userCircle.style.backgroundImage = `url(${dataUrl})`;
+                    userCircle.classList.add('has-picture');
+                    if (firstInitialSpan) firstInitialSpan.style.color = 'transparent'; 
+                } else {
+                    userCircle.style.backgroundImage = ''; 
+                    userCircle.classList.remove('has-picture');
+                    if (firstInitialSpan) firstInitialSpan.style.color = 'white'; 
+                }
+            };
+
+            loadProfilePicture();
+
+            userCircle.addEventListener('click', () => {
+                profilePictureInput.click(); 
+            });
+
+            profilePictureInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const dataUrl = e.target.result;
+                        localStorage.setItem(`user_data_${currentUserPhone}_profilePictureDataUrl`, dataUrl);
+                        loadProfilePicture();
+                    };
+                    reader.readAsDataURL(file); 
+                }
+            });
+
+            changePasswordButton.addEventListener('click', function() {
+                const lastChangeTimestamp = parseInt(localStorage.getItem(`user_data_${currentUserPhone}_lastPasswordChangeTimestamp`) || '0', 10);
+                const now = Date.now();
+                const lockDuration = 100000 * 1000;
+
+                if (now - lastChangeTimestamp < lockDuration) {
+                    alert("#400_Error_wait_till_100000_seconds");
+                } else {
+                    window.location.href = 'change_password.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

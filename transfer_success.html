@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Successful</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <!-- Add html2canvas library for screenshots -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            color: #333;
+            position: relative;
+            padding-top: 60px;
+            box-sizing: border-box;
+        }
+
+        .top-right-complete {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1em;
+            color: #555;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Wrapper for content to be captured */
+        #capture-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Take full width */
+            background-color: #f0f0f0; /* Ensure background is included */
+            padding-top: 5vh; /* Match original spacing */
+            padding-bottom: 40px; /* Match original spacing */
+            box-sizing: border-box;
+        }
+
+        .main-content-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* margin-top: 5vh; */ /* Now handled by capture-area padding */
+        }
+
+        .success-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #44CD74;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .success-circle i {
+            font-size: 3em;
+            color: white;
+            line-height: 1;
+        }
+
+        .status-successful {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .transferred-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .note-text {
+            font-size: 0.9em;
+            color: #777;
+            font-style: italic;
+            text-align: center;
+            width: 90%;
+            max-width: 300px;
+            line-height: 1.4;
+            /* margin-bottom: 40px; */ /* Now handled by capture-area padding */
+        }
+
+        /* Updated styles for separated interaction boxes */
+        .interaction-button {
+            width: 90%;
+            max-width: 400px;
+            padding: 15px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            transition: background-color 0.2s ease;
+            border: 1px solid #ccc;
+            border-radius: 8px; /* Apply border-radius to individual boxes */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #fff;
+            margin-top: 15px; /* Add margin between boxes */
+        }
+
+        #shareReceiptButton {
+             /* Keep default margin-top */
+        }
+
+        #addToFavorites {
+             /* Make non-clickable */
+             cursor: default;
+             opacity: 0.8; /* Slightly dim it to indicate non-interactivity */
+        }
+
+        .interaction-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Prevent hover effect on non-clickable button */
+        #addToFavorites:hover {
+            background-color: #fff; /* Revert background on hover */
+        }
+
+        #addToFavorites i {
+            font-size: 1.2em;
+            color: #E74C3C;
+            margin-right: 5px;
+            line-height: 1;
+        }
+
+        .ph-check-bold, .ph-heart-fill {
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div id="complete-link" class="top-right-complete">complete</div>
+
+    <div id="capture-area"> 
+        <div class="main-content-block">
+            <div class="success-circle">
+                <i class="ph-check-bold"></i>
+            </div>
+            <div class="status-successful">Successful</div>
+            <div id="transferredAmount" class="transferred-amount">₦0.00</div>
+            <div class="note-text">Kindly note that the actual credit time is subject to the bank</div>
+        </div>
+    </div>
+
+    <!-- Separate interaction boxes -->
+    <div id="shareReceiptButton" class="interaction-button">
+        Share receipt
+    </div>
+    <div id="addToFavorites" class="interaction-button">
+        <i class="ph-heart-fill"></i>
+        Add to favorites
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const transferredAmountDisplay = document.getElementById('transferredAmount');
+            const completeLink = document.getElementById('complete-link');
+            const shareReceiptButton = document.getElementById('shareReceiptButton');
+            const addToFavoritesButton = document.getElementById('addToFavorites');
+            const captureArea = document.getElementById('capture-area'); 
+
+            const transferredAmount = localStorage.getItem('lastTransferredAmount');
+
+            if (transferredAmount) {
+                const formattedAmount = parseFloat(transferredAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                transferredAmountDisplay.textContent = `₦${formattedAmount}`;
+            } else {
+                transferredAmountDisplay.textContent = '₦0.00';
+            }
+
+            completeLink.addEventListener('click', function() {
+                console.log('"Complete" clicked. Redirecting to balance page.');
+                // Clean up the lastTransferredAmount from localStorage
+                localStorage.removeItem('lastTransferredAmount');
+                window.location.href = 'balance.html';
+            });
+
+            shareReceiptButton.addEventListener('click', function() {
+                console.log('"Share receipt" clicked. Capturing screenshot for download...');
+
+                // Ensure the capture area has a defined background color for the screenshot
+                captureArea.style.backgroundColor = '#f0f0f0';
+
+                html2canvas(captureArea, { 
+                    logging: false, // Disable logging for cleaner console
+                    useCORS: true, // Enable cross-origin images if any are used
+                    backgroundColor: '#f0f0f0' // Ensure background color is captured
+                }).then(function(canvas) {
+                    console.log('Screenshot captured. Attempting to download...');
+                    // Convert canvas to Blob
+                    canvas.toBlob(function(blob) {
+                        if (blob) {
+                            // Create an object URL for the blob
+                            const url = URL.createObjectURL(blob);
+
+                            // Create a temporary link element
+                            const link = document.createElement('a');
+                            link.href = url;
+                            // Suggest a filename including a timestamp for uniqueness
+                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                            link.download = `palmpay_receipt_${timestamp}.png`; // Suggested filename
+
+                            // Append to body (required for Firefox)
+                            document.body.appendChild(link);
+
+                            // Programmatically click the link to trigger the download
+                            link.click();
+
+                            // Clean up: remove the link and revoke the object URL
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                            console.log('Download triggered.');
+
+                            // Restore original background if it was temporarily set
+                            captureArea.style.backgroundColor = '';
+                        } else {
+                            console.error('Failed to create blob from canvas.');
+                            alert('Failed to prepare receipt for download.');
+                            // Restore original background
+                            captureArea.style.backgroundColor = '';
+                        }
+                    }, 'image/png'); // Specify image format
+
+                }).catch(err => {
+                    console.error('Error capturing screenshot:', err);
+                    alert('Failed to capture screenshot.');
+                    // Restore original background
+                    captureArea.style.backgroundColor = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

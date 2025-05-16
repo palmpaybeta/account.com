@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0; /* Milk background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items from the top */
+            min-height: 100vh;
+            color: #333;
+            padding-top: 60px; /* Add space for fixed header */
+            padding-bottom: 80px; /* Add space for fixed input container */
+            box-sizing: border-box;
+        }
+
+        .support-chat-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 20px;
+             background-color: #f0f0f0; /* Match body background */
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             left: 0;
+             z-index: 10;
+             border-bottom: 1px solid #eee;
+             justify-content: space-between;
+         }
+
+        .support-chat-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+             margin-right: auto; /* Push title to center */
+        }
+
+        .support-chat-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+             margin: 0 auto; /* Center the title */
+        }
+
+        /* Dummy element for centering */
+        .support-chat-header .placeholder {
+            width: 1.5em; /* Same width as back arrow */
+             margin-left: auto; /* Push title to center */
+        }
+
+
+        .chat-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 90%; /* Adjusted width */
+            max-width: 600px;
+            flex-grow: 1; /* Allow content to expand */
+            display: flex; /* Use flex for message layout */
+            flex-direction: column; /* Messages stack vertically */
+            overflow-y: auto; /* Add scroll for messages */
+             /* margin-bottom: 80px; */ /* Space is now handled by padding-bottom on body */
+            box-sizing: border-box;
+            margin-top: 20px; /* Space below header */
+        }
+
+         .chat-message {
+             margin-bottom: 10px;
+             padding: 8px 12px;
+             border-radius: 15px;
+             max-width: 80%;
+             word-wrap: break-word;
+             text-align: left;
+             /* Remove align-self here, use specific classes below */
+         }
+
+         /* Admin View - User messages on the LEFT */
+         .chat-message.user-admin {
+             align-self: flex-start;
+             background-color: #e9e9eb; /* Light grey background */
+             color: #333;
+             border-bottom-left-radius: 2px; /* Slightly flat edge */
+         }
+
+         /* Admin View - Admin/Auto messages on the RIGHT */
+         .chat-message.admin-reply {
+             align-self: flex-end;
+             background-color: #AE00FF; /* Palmpay theme color */
+             color: white;
+             border-bottom-right-radius: 2px; /* Slightly flat edge */
+         }
+
+
+         .chat-message .timestamp {
+             display: block;
+             font-size: 0.7em;
+             margin-top: 3px;
+             text-align: right;
+             /* Default color, overridden by specific classes */
+         }
+          .chat-message.user-admin .timestamp {
+               color: rgba(51, 51, 51, 0.8); /* Lighter color for light background */
+          }
+          .chat-message.admin-reply .timestamp {
+               color: rgba(255, 255, 255, 0.8); /* Lighter color for dark background */
+          }
+
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 25px; /* Pill shape */
+            padding: 5px 15px;
+            width: 90%; /* Match chat-box width */
+            max-width: 600px; /* Match chat-box max-width */
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white; /* Ensure background is white */
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 20;
+        }
+
+        .support-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            padding: 8px 0;
+            font-size: 1em;
+            background-color: transparent;
+        }
+
+        .send-icon {
+            color: #AE00FF;
+            cursor: pointer;
+            font-size: 1.5em;
+            padding: 5px;
+            visibility: hidden;
+            margin-left: 10px;
+            transition: color 0.2s ease;
+        }
+         .send-icon:hover.visible {
+             color: #9000cc;
+         }
+
+        .send-icon.visible {
+            visibility: visible;
+        }
+
+        .no-messages-placeholder {
+             text-align: center;
+             color: #777;
+             margin-top: 30px;
+        }
+    </style>
+</head>
+<body class="admin_page_body">
+    <script>
+        function applyUserDarkModePreference() {
+            const someUserHasDarkMode = Array.from({length: localStorage.length}, (_, i) => localStorage.key(i))
+                                      .some(key => key.includes('_darkModeEnabled') && localStorage.getItem(key) === 'true');
+            if (someUserHasDarkMode) { 
+                document.body.classList.remove('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            document.body.classList.remove('dark-mode');
+        }
+        applyUserDarkModePreference();
+    </script>
+    <div class="support-chat-header">
+         <a href="admin.html" class="back-link">&larr;</a>
+         <h1 class="header-title">Support Chat</h1>
+         <div class="placeholder"></div> 
+    </div>
+
+    <div id="chat-box" class="chat-box">
+        <!-- Messages will be appended here -->
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="support-input" class="support-input" placeholder="Reply to user...">
+        <i id="send-icon" class="ph-paper-plane-tilt send-icon"></i> 
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const supportInput = document.getElementById('support-input');
+            const sendIcon = document.getElementById('send-icon');
+            const chatBox = document.getElementById('chat-box');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestId = urlParams.get('requestId'); 
+
+            let supportRequests = JSON.parse(localStorage.getItem('supportRequests') || '[]');
+            let currentRequest = null;
+
+            if (requestId) {
+                 currentRequest = supportRequests.find(req => req.id === parseInt(requestId, 10));
+            }
+
+            if (!currentRequest) {
+                 console.error("Support request not found with ID:", requestId);
+                 chatBox.innerHTML = '<div class="chat-message system-admin">Error: Support request not found.</div>';
+                 supportInput.disabled = true;
+                 sendIcon.style.visibility = 'hidden';
+                 return; 
+            }
+
+            function formatTimestamp(timestamp) {
+                const date = new Date(timestamp);
+                const hours = date.getHours();
+                const minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12;
+                const displayHours = formattedHours ? formattedHours : 12; 
+                const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+                return `${displayHours}:${displayMinutes} ${ampm}`;
+            }
+
+            function displayMessagesAdminView() {
+                chatBox.innerHTML = ''; 
+
+                if (!currentRequest.messages || currentRequest.messages.length === 0) {
+                     chatBox.innerHTML = '<div class="no-messages-placeholder">No messages in this conversation yet.</div>';
+                     return;
+                }
+
+                currentRequest.messages.forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('chat-message');
+
+                    messageElement.classList.add(msg.sender === 'user' ? 'user-admin' : 'admin-reply');
+
+                    messageElement.innerHTML = `${msg.text}<span class="timestamp">${formatTimestamp(msg.timestamp)}</span>`;
+                    chatBox.appendChild(messageElement);
+                });
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            displayMessagesAdminView();
+
+            supportInput.addEventListener('input', function() {
+                sendIcon.classList.toggle('visible', supportInput.value.trim().length > 0);
+            });
+
+            sendIcon.addEventListener('click', function() {
+                const adminMessage = supportInput.value.trim();
+
+                if (adminMessage === '' || !currentRequest) {
+                    return;
+                }
+
+                currentRequest.messages.push({
+                    sender: 'admin', 
+                    text: adminMessage,
+                    timestamp: Date.now()
+                });
+
+                const requestIndex = supportRequests.findIndex(req => req.id === currentRequest.id);
+                 if (requestIndex !== -1) {
+                     supportRequests[requestIndex] = currentRequest;
+                     localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+                 } else {
+                     console.error("Could not find current request in list to update.");
+                 }
+
+                displayMessagesAdminView();
+
+                supportInput.value = '';
+                sendIcon.classList.remove('visible');
+            });
+
+            supportInput.addEventListener('keypress', function(event) {
+                 if (event.key === 'Enter') {
+                      event.preventDefault(); 
+                      sendIcon.click(); 
+                 }
+             });
+
+            supportInput.dispatchEvent(new Event('input')); 
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palmpay Beta Balance</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Existing styles */
+        .header {
+            background-color: #FFFFFF !important;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            justify-content: flex-start;
+        }
+
+        .user-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #AE00FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 15px;
+            /* Add image styling */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        .user-circle span {
+            /* Hide the initial when an image is loaded */
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 40px; /* Vertically center the text */
+            color: white; /* Initial color */
+        }
+
+        .user-circle.has-picture span {
+            color: transparent; /* Hide the initial */
+        }
+
+        .user-greeting {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .balance-box {
+            text-align: left;
+            padding-left: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 30px 15px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+            background-color: #fff; /* Ensure background is white */
+        }
+
+        #transaction-history-link {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8em;
+            color: #777;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Transaction History Slider Styles */
+        .transaction-history-slider {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateY(100%); /* Initially hidden */
+            transition: transform 0.3s ease;
+            height: 50vh; /* Initial height */
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            border-top-left-radius: 20px; /* Curvy edge on top left */
+            border-top-right-radius: 20px; /* Curvy edge on top right */
+            display: flex; /* Use flex to position items easily */
+            flex-direction: column;
+        }
+
+        .transaction-history-slider.active {
+            transform: translateY(calc(100% - 50vh)); /* Slide up to initial height */
+        }
+
+        .transaction-history-slider.full {
+            transform: translateY(0); /* Slide up to full screen */
+            height: 100vh;
+            border-radius: 0; /* Remove border radius when full screen */
+            padding-top: 40px; /* Add space for the back button */
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #333;
+        }
+        .add-money-link {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.7em; /* Adjusted size */
+            color: blue;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .transaction-badge {
+            font-size: 0.6em;
+            color: #fff;
+            background-color: #AE00FF;
+            border-radius: 50%;
+            padding: 0 4px;
+            margin-left: 4px;
+        }
+        .transaction-badge.hidden {
+            display: none;
+        }
+
+        .bottom-icons-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%; /* Ensure the inner flex container takes full width */
+            padding: 0; /* Remove padding here, add to the outer box */
+            box-sizing: border-box;
+        }
+
+        .icon-row-box {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 20px 15px; /* Adjust margin from balance box */
+            padding: 15px 0; /* Add padding inside the box */
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff; /* Ensure background is white */
+        }
+
+        .second-icon-row-box {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 20px 15px; /* Adjust margin */
+            padding: 15px 0; /* Add padding inside the box */
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #fff; /* Ensure background is white */
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #777;
+            font-size: 0.9em;
+            text-align: center;
+            width: 25%; /* Distribute space evenly */
+            margin-bottom: 15px; /* Add space between rows if they wrap */
+        }
+
+        .icon-item p {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #555;
+        }
+
+        .naira-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #AE00FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .ph-eye,
+        .ph-eye-slash,
+        .ph-bell,
+        .ph-users,
+        .ph-house,
+        .ph-user,
+        .ph-bank,
+        .ph-money,
+        .ph-trophy,
+        .ph-wallet,
+        .ph-lightbulb,
+        .ph-bag,
+        .ph-device-mobile,
+        .ph-recycle,
+        .ph-soccer-ball,
+        .ph-wifi-high,
+        .ph-users-three { /* Add the new icon class here */
+            line-height: 0;
+        }
+        .balance-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Fixed bottom navigation */
+        #bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+            z-index: 500; /* Ensure it's above other content but below slider */
+            margin: 0; /* Remove original margins */
+            padding: 10px 0; /* Adjust padding */
+            border-radius: 0; /* Remove original border-radius */
+        }
+
+        #bottom-nav .icon-item {
+            transition: color 0.2s ease;
+        }
+
+        #bottom-nav .icon-item i {
+            color: #777; /* Default color for icons */
+            transition: color 0.2s ease;
+        }
+
+        #bottom-nav .icon-item.active i {
+            color: #AE00FF; /* Active color for icons */
+        }
+
+        /* Adjust main container padding to avoid overlap */
+        #balance-container {
+            padding-bottom: 80px; /* Add padding to account for the fixed bottom nav height */
+            box-sizing: border-box;
+        }
+
+        /* Styles for transaction list in slider */
+        .transaction-filter-bar {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 0 5px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        .transaction-filter-bar span {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .transaction-filter-bar span:hover {
+             background-color: #f0f0f0;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            position: relative; /* Needed for month position */
+            margin-left: 40px; /* Space for the month on the left */
+        }
+
+        .transaction-month {
+            position: absolute;
+            top: 50%;
+            left: -40px; /* Position it outside the item, aligned left */
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            color: #AE00FF;
+            font-weight: bold;
+             width: 30px; /* Give it a fixed width */
+             text-align: center;
+        }
+
+        .transaction-icon-circle {
+             width: 30px;
+             height: 30px;
+             border-radius: 50%;
+             background-color: #AE00FF; /* Example color */
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin-right: 10px;
+             font-size: 1.2em;
+             color: white;
+        }
+
+        .transaction-details {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: calc(100% - 40px); /* Adjust width */
+        }
+
+        .transaction-description {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 1em;
+            color: #333;
+             margin-right: 10px; /* Space between description and amount/status */
+        }
+
+        .amount-status-wrapper { /* New wrapper */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Align items to the right */
+             min-width: 80px; /* Give it some minimum width */
+        }
+
+        .transaction-amount {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .transaction-status-text { /* New style for failed status */
+             font-size: 0.7em;
+             color: #777777; /* Grey color */
+             font-style: italic;
+             margin-top: 2px;
+        }
+
+        .no-transaction-message {
+             text-align: center;
+             color: #777;
+             margin-top: 30px;
+             flex-grow: 1; /* Allow it to take available space */
+             display: flex;
+             align-items: center;
+             justify-content: center;
+        }
+
+         /* Adjust padding inside slider for content */
+        .transaction-history-slider .slider-content {
+            /* Removed padding-top to rely on the main slider padding */
+        }
+         .transaction-history-slider h2 {
+             margin-top: 0;
+             margin-bottom: 10px; /* Adjusted margin */
+             text-align: center;
+         }
+        /* Style for the list container */
+        #completed-transactions-list {
+            width: 100%;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 5px; /* Add slight padding for scrollbar */
+        }
+
+        /* Custom Scrollbar for transaction list */
+        #completed-transactions-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #completed-transactions-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #completed-transactions-list::-webkit-scrollbar-thumb {
+            background: #AE00FF;
+            border-radius: 3px;
+        }
+
+        #completed-transactions-thumb:hover {
+            background: #9000cc;
+        }
+
+        .transaction-month-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .dark-mode .header {
+            background-color: var(--dark-header-bg) !important;
+            color: var(--dark-text) !important;
+        }
+
+         .dark-mode p,
+         .dark-mode .user-greeting,
+         .dark-mode .balance-box span,
+         .dark-mode .icon-item p {
+             color: var(--dark-text);
+         }
+         .dark-mode .balance-info span {
+             color: var(--dark-secondary-text);
+         }
+
+        .dark-mode .balance-box,
+        .dark-mode .icon-row-box,
+        .dark-mode .second-icon-row-box {
+            background-color: var(--dark-box-bg);
+            border-color: var(--dark-border-color);
+            box-shadow: 0 1px 3px var(--dark-box-shadow);
+        }
+
+        .dark-mode .transaction-history-slider {
+            background-color: var(--dark-box-bg);
+            border-color: var(--dark-border-color);
+            box-shadow: 0 -2px 5px var(--dark-box-shadow);
+        }
+
+        .dark-mode #bottom-nav {
+            background-color: var(--dark-bg);
+            border-top-color: var(--dark-border-color);
+        }
+
+        .dark-mode .icon-item {
+            color: var(--dark-icon-color);
+        }
+
+        .dark-mode .icon-item p {
+            color: var(--dark-icon-color);
+        }
+         .dark-mode .naira-box {
+             background-color: var(--dark-active-icon-color);
+         }
+
+        /* New styles to remove click feedback on icons */
+        #userCircleSmall,
+        #eye-icon,
+        #bell-icon,
+        #group-icon,
+        .icon-row-box .icon-item,
+        .second-icon-row-box .icon-item,
+        #bottom-nav .icon-item {
+            -webkit-tap-highlight-color: transparent; /* Removes tap highlight on WebKit browsers */
+            outline: none; /* Removes focus outline which might be perceived as click color */
+        }
+        /* End new styles */
+
+         /* Dark mode for transaction list in slider */
+         .dark-mode .transaction-filter-bar {
+             color: var(--dark-tertiary-text);
+         }
+         .dark-mode .transaction-filter-bar span:hover {
+             background-color: var(--dark-faint-bg);
+         }
+         .dark-mode .transaction-item {
+             border-bottom-color: var(--dark-border-color);
+         }
+          .dark-mode .transaction-month {
+              color: var(--dark-active-icon-color);
+          }
+         .dark-mode .transaction-icon-circle {
+             background-color: var(--dark-active-icon-color);
+             color: var(--dark-button-text);
+         }
+          .dark-mode .transaction-description,
+          .dark-mode .transaction-amount {
+             color: var(--dark-text);
+          }
+          .dark-mode .transaction-status-text {
+             color: var(--dark-tertiary-text);
+          }
+         .dark-mode .no-transaction-message {
+             color: var(--dark-tertiary-text);
+         }
+         .dark-mode .transaction-month-header {
+             color: var(--dark-text);
+         }
+    </style>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+
+        // Common helper function for system notifications
+        window.showAppNotification = function(condition, amountString, timestamp, forUserPhone = null) {
+            const localCurrentUserPhone = localStorage.getItem('currentUserPhone');
+            // Show notification if it's general (forUserPhone is null) OR if it's for the currently logged-in user.
+            if (forUserPhone && forUserPhone !== localCurrentUserPhone) {
+                console.log(`System Notification for ${forUserPhone}, current user is ${localCurrentUserPhone}. Skipping.`);
+                return;
+            }
+
+            const formattedTime = new Date(timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const notificationTitle = "Palmpay Beta";
+            // Amount string should already include +/- and currency symbol from call sites.
+            let notificationBody = `${condition}\nAmount: ${amountString}\nTime: ${formattedTime}`;
+
+            const iconUrl = 'https://upload.pinnocent.com/assets/files/upload-1746004279.jpeg'; // Palmpay logo
+
+            if (!("Notification" in window)) {
+                console.log("This browser does not support desktop notification");
+            } else if (Notification.permission === "granted") {
+                try {
+                    const notification = new Notification(notificationTitle, {
+                        body: notificationBody,
+                        icon: iconUrl,
+                        tag: `palmpay-tx-${timestamp}-${condition.replace(/\s+/g, '-')}-${Math.random()}` // Ensure unique tag
+                    });
+                    notification.onclick = function () {
+                        window.location.href = 'notification.html';
+                        window.focus();
+                    };
+                } catch (e) {
+                    console.error("Error creating notification:", e);
+                }
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === "granted") {
+                        console.log("Notification permission granted.");
+                        try {
+                            const notification = new Notification(notificationTitle, {
+                                body: notificationBody,
+                                icon: iconUrl,
+                                tag: `palmpay-tx-${timestamp}-${condition.replace(/\s+/g, '-')}-${Math.random()}`
+                            });
+                            notification.onclick = function () {
+                                window.location.href = 'notification.html';
+                                window.focus();
+                            };
+                        } catch (e) {
+                            console.error("Error creating notification after permission grant:", e);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+    <div id="balance-container">
+        <div class="header">
+            <div id="userCircleSmall" class="user-circle"><span>P</span></div>
+            <div class="user-greeting">Hi, ...</div>
+        </div>
+        <p style="font-size: 14px; color: #777; margin-top: -10px; text-align: left; margin-left: 20px;">Welcome, let's make payments</p>
+        <div class="balance-box">
+            <a href="#" id="transaction-history-link" class="transaction-history-link">Transaction History
+                <span id="transaction-badge" class="transaction-badge hidden">1</span>
+            </a>
+            <div class="balance-info">
+                 <span style="font-size: 0.8em; color: #555; display: flex; align-items: center; justify-content: flex-start;">
+                    Available balance
+                    <i id="eye-icon" class="ph-eye" style="font-size: 1em; cursor: pointer; margin-left: 5px;"></i>
+                </span>
+                <span id="balance">₦0.00</span>
+            </div>
+            <a href="add_money.html" class="add-money-link">Add money</a>
+        </div>
+        <i id="bell-icon" class="ph-bell" style="font-size: 1.5em; cursor: pointer; position: absolute; top: 10px; right: 10px; color: #777;"></i>
+        <i id="group-icon" class="ph-users" style="font-size: 1.5em; cursor: pointer; position: absolute; top: 10px; right: 50px; color: #777;"></i>
+
+        <!-- First row of icons wrapped in a box -->
+        <div class="icon-row-box">
+            <div class="bottom-icons-row">
+                <div class="icon-item">
+                    <i id="bank-icon" class="ph-bank" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>To bank</p>
+                </div>
+                <div class="icon-item">
+                    <i id="palmpay-icon" class="ph-user" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>To Palmpay</p>
+                </div>
+                <div class="icon-item">
+                    <div class="naira-box">₦</div>
+                    <p>Withdraw</p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Second row of icons wrapped in a box -->
+        <div class="second-icon-row-box">
+            <div class="bottom-icons-row">
+                 <div class="icon-item">
+                    <i class="ph-bag" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>refer and earn</p>
+                </div>
+                <div class="icon-item">
+                    <i class="ph-trophy" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>Win big</p>
+                </div>
+                <div class="icon-item">
+                    <i class="ph-wallet" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>Loan</p>
+                </div>
+                <div class="icon-item">
+                    <i class="ph-lightbulb" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>Smart Earn</p>
+                </div>
+            </div>
+            <!-- Add the new row of four icons below the existing ones -->
+             <div class="bottom-icons-row">
+                 <div class="icon-item">
+                    <i class="ph-device-mobile" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>Airtime</p>
+                </div>
+                 <div class="icon-item">
+                     <i class="ph-wifi-high" style="font-size: 2em; cursor: pointer;"></i>
+                     <p>Data</p>
+                 </div>
+                <div class="icon-item">
+                    <i class="ph-soccer-ball" style="font-size: 2em; cursor: pointer;"></i>
+                    <p>Betting</p>
+                </div>
+                 <div class="icon-item">
+                     <i class="ph-recycle" style="font-size: 2em; cursor: pointer;"></i>
+                     <p>Bills</p>
+                 </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Third row of icons (Fixed Bottom Navigation) -->
+    <div id="bottom-nav" class="icon-row-box">
+         <div class="bottom-icons-row">
+            <div id="nav-home" class="icon-item active">
+                <i class="ph-house" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+            <div id="nav-finance" class="icon-item">
+                <i class="ph-money" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+            <div id="nav-profile" class="icon-item">
+                <i class="ph-user" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction History Slider -->
+    <div id="transaction-history-slider" class="transaction-history-slider">
+        <div id="back-button" class="back-button hidden">
+            &larr;
+        </div>
+        <h2>Transaction History</h2>
+        <div class="transaction-filter-bar">
+             <span>All Categories</span>
+             <span>All Status</span>
+        </div>
+
+        <div id="completed-transactions-list">
+             <!-- Completed transactions will be added here -->
+        </div>
+
+        <p id="no-transaction-message" style="text-align: center; color: #777;">No transaction made yet</p>
+
+        <div id="pending-transaction" class="hidden" style="text-align: center;">
+            <div id="pending-amount" style="font-size: 2em; font-weight: bold;"></div>
+            <div style="font-style: italic; color: #888;">pending</div>
+            <div style="display: flex; justify-content: space-between; position: absolute; bottom: 20px; width: 100%; padding: 0 20px; box-sizing: border-box;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneNumber = localStorage.getItem('userPhone') || "9162416826";
+            const userFirstName = localStorage.getItem('userFirstName');
+            const greetingDiv = document.querySelector('.user-greeting');
+            const userCircleSmall = document.getElementById('userCircleSmall');
+            const userCircleSmallInitial = userCircleSmall.querySelector('span');
+            const currentUserPhone = localStorage.getItem('currentUserPhone'); // Get current user's phone (ID)
+
+            if (userFirstName) {
+                greetingDiv.textContent = `Hi, ${userFirstName}`;
+            } else {
+                const formattedPhoneNumber = phoneNumber.slice(0, 3) + '...' + phoneNumber.slice(-4);
+                greetingDiv.textContent = `Hi, ${formattedPhoneNumber}`;
+            }
+            userCircleSmallInitial.textContent = (userFirstName || phoneNumber).charAt(0).toUpperCase();
+
+            // User-specific data retrieval
+            let storedBalance = parseFloat(localStorage.getItem(`user_data_${currentUserPhone}_currentBalance`) || '0.00');
+            let balanceVisible = localStorage.getItem(`user_data_${currentUserPhone}_balanceVisible`) !== 'false';
+            let userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+
+            const transactionHistoryLink = document.getElementById('transaction-history-link');
+            const transactionHistorySlider = document.getElementById('transaction-history-slider');
+            const backButton = document.getElementById('back-button');
+            const noTransactionMessage = document.getElementById('no-transaction-message');
+            const pendingTransactionDiv = document.getElementById('pending-transaction');
+            const pendingAmountDiv = document.getElementById('pending-amount');
+            const balanceDisplay = document.getElementById('balance');
+            const transactionBadge = document.getElementById('transaction-badge');
+            const eyeIcon = document.getElementById('eye-icon');
+            const bellIcon = document.getElementById('bell-icon');
+            const groupIcon = document.getElementById('group-icon');
+            const bankIcon = document.getElementById('bank-icon');
+            const palmpayIcon = document.getElementById('palmpay-icon');
+            const bankIconItem = document.getElementById('bank-icon').closest('.icon-item');
+            const palmpayIconItem = document.getElementById('palmpay-icon').closest('.icon-item');
+            const loanIcon = document.querySelector('.ph-wallet').closest('.icon-item');
+            const bottomNavItems = document.querySelectorAll('#bottom-nav .icon-item');
+            const navHome = document.getElementById('nav-home');
+            const navFinance = document.getElementById('nav-finance');
+            const navProfile = document.getElementById('nav-profile');
+            const completedTransactionsList = document.getElementById('completed-transactions-list');
+
+            const CURRENT_APP_VERSION = '6.4.0';
+            const storedAppVersion = localStorage.getItem('palmpayAppVersion');
+            if (!storedAppVersion || storedAppVersion < CURRENT_APP_VERSION) {
+                 localStorage.setItem('palmpayAppVersion', CURRENT_APP_VERSION);
+                 console.log(`App version set to ${CURRENT_APP_VERSION}`);
+            } else {
+                 console.log(`App version is ${storedAppVersion}`);
+            }
+
+            const loadProfilePicture = () => {
+                const dataUrl = localStorage.getItem(`user_data_${currentUserPhone}_profilePictureDataUrl`);
+                if (dataUrl) {
+                    userCircleSmall.style.backgroundImage = `url(${dataUrl})`;
+                    userCircleSmall.classList.add('has-picture');
+                    userCircleSmallInitial.style.color = 'transparent';
+                } else {
+                    userCircleSmall.style.backgroundImage = '';
+                    userCircleSmall.classList.remove('has-picture');
+                    userCircleSmallInitial.style.color = 'white';
+                }
+            };
+
+            loadProfilePicture();
+
+            function toggleBalanceVisibility() {
+                balanceVisible = !balanceVisible;
+                const storedNumericBalance = parseFloat(storedBalance || '0.00'); 
+                const formattedVisibleBalance = storedNumericBalance.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                if (balanceVisible) {
+                    balanceDisplay.textContent = '₦' + formattedVisibleBalance;
+                    eyeIcon.className = 'ph-eye';
+                } else {
+                    balanceDisplay.textContent = '₦' + '*'.repeat(formattedVisibleBalance.length);
+                    eyeIcon.className = 'ph-eye-slash';
+                }
+                localStorage.setItem(`user_data_${currentUserPhone}_balanceVisible`, balanceVisible);
+            }
+
+            function setActiveNavItem(selectedItem) {
+                bottomNavItems.forEach(item => item.classList.remove('active'));
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
+                }
+            }
+
+            eyeIcon.addEventListener('click', toggleBalanceVisibility);
+
+            const pendingNotifOnLoad = userSimulatedNotifications.find(notif => notif.type === 'pending_deposit');
+
+            if (pendingNotifOnLoad) {
+                try {
+                     const completedTransfers = userSimulatedNotifications.filter(notif => ['completed', 'failed', 'reversed', 'incoming_transfer'].includes(notif.type));
+                     if (completedTransfers.length === 0) {
+                         noTransactionMessage.style.display = 'none';
+                     }
+
+                    pendingAmountDiv.textContent = '₦' + parseFloat(pendingNotifOnLoad.data.selectedAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    pendingTransactionDiv.classList.remove('hidden');
+                    transactionBadge.classList.remove('hidden'); 
+                } catch (e) {
+                    console.error("Error parsing pending transaction data:", e);
+                     const completedTransfers = userSimulatedNotifications.filter(notif => ['completed', 'failed', 'reversed', 'incoming_transfer'].includes(notif.type));
+                     if (completedTransfers.length === 0) {
+                         noTransactionMessage.style.display = 'block';
+                     }
+                    pendingTransactionDiv.classList.add('hidden');
+                    transactionBadge.classList.add('hidden'); 
+                }
+            } else {
+                 const completedTransfers = userSimulatedNotifications.filter(notif => ['completed', 'failed', 'reversed', 'incoming_transfer'].includes(notif.type));
+                 if (completedTransfers.length === 0) {
+                     noTransactionMessage.style.display = 'block';
+                 }
+                pendingTransactionDiv.classList.add('hidden');
+                transactionBadge.classList.add('hidden'); 
+            }
+
+            transactionHistoryLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                displayTransactions(); 
+                transactionHistorySlider.classList.add('active');
+            });
+
+            let startY, currentY, isDragging = false;
+
+            transactionHistorySlider.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+            });
+
+            transactionHistorySlider.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = startY - currentY;
+
+                if (deltaY > 50 && !transactionHistorySlider.classList.contains('full')) {
+                    transactionHistorySlider.classList.remove('active');
+                    transactionHistorySlider.classList.add('full');
+                    backButton.classList.remove('hidden');
+                } else if (deltaY < -50 && transactionHistorySlider.classList.contains('full')) {
+                    if (currentY - startY > 150) { 
+                        transactionHistorySlider.classList.remove('full');
+                        transactionHistorySlider.classList.remove('active');
+                        backButton.classList.add('hidden');
+                    } else if (currentY - startY > 50) { 
+                        transactionHistorySlider.classList.remove('full');
+                    }
+                }
+            });
+
+            transactionHistorySlider.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+
+            transactionHistorySlider.addEventListener('click', function() {
+                if (!transactionHistorySlider.classList.contains('full')) {
+                    transactionHistorySlider.classList.remove('active');
+                    transactionHistorySlider.classList.add('full');
+                    backButton.classList.remove('hidden');
+                }
+            });
+
+            backButton.addEventListener('click', function(event) {
+                event.stopPropagation(); 
+                transactionHistorySlider.classList.remove('full');
+                transactionHistorySlider.classList.remove('active');
+                backButton.classList.add('hidden');
+            });
+
+            const storedVisibility = localStorage.getItem(`user_data_${currentUserPhone}_balanceVisible`);
+
+            if (storedVisibility !== null && storedVisibility === 'false') {
+                 balanceVisible = false; 
+                 toggleBalanceVisibility(); 
+             } else {
+                 balanceVisible = true; 
+                 localStorage.setItem(`user_data_${currentUserPhone}_balanceVisible`, 'true'); 
+                 const displayBalance = parseFloat(storedBalance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                 balanceDisplay.textContent = '₦' + displayBalance;
+                 eyeIcon.className = 'ph-eye';
+             }
+
+            bellIcon.addEventListener('click', function() {
+                window.location.href = 'notification.html';
+            });
+
+            groupIcon.addEventListener('click', function() {
+                window.location.href = 'support.html?source=balance';
+            });
+
+            bankIconItem.addEventListener('click', function() {
+                window.location.href = 'transfer_to_bank.html?mode=otherBank';
+            });
+
+            palmpayIconItem.addEventListener('click', function() {
+                window.location.href = 'transfer_to_bank.html?mode=palmpay';
+            });
+
+            loanIcon.addEventListener('click', function() {
+                window.location.href = 'loan.html';
+            });
+
+            setActiveNavItem(navHome);
+
+            bottomNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    setActiveNavItem(this); 
+
+                    if (this.id === 'nav-home') {
+                       console.log("Navigate to Home (current page)");
+                    } else if (this.id === 'nav-finance') {
+                        window.location.href = 'loan.html';
+                    } else if (this.id === 'nav-profile') {
+                        window.location.href = 'profile.html'; 
+                    }
+                });
+            });
+
+            // Request Notification permission on load
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        console.log("Notification permission granted.");
+                    } else {
+                        console.log("Notification permission denied or dismissed.");
+                    }
+                });
+            }
+
+            function displayTransactions() {
+                completedTransactionsList.innerHTML = ''; 
+                noTransactionMessage.style.display = 'none'; 
+
+                const transactionsToDisplay = userSimulatedNotifications.filter(notif =>
+                    ['completed', 'failed', 'reversed', 'incoming_transfer'].includes(notif.type)
+                ).sort((a, b) => b.timestamp - a.timestamp);
+
+                if (transactionsToDisplay.length === 0) {
+                    noTransactionMessage.style.display = 'block';
+                    return;
+                }
+
+                const transactionsByMonth = transactionsToDisplay.reduce((acc, notif) => {
+                    const date = new Date(notif.timestamp);
+                    const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    if (!acc[monthYear]) acc[monthYear] = [];
+                    acc[monthYear].push(notif);
+                    return acc;
+                }, {});
+
+                const sortedMonths = Object.keys(transactionsByMonth).sort((a,b) => new Date(b.split(" ")[1], getMonthIndex(b.split(" ")[0])) - new Date(a.split(" ")[1], getMonthIndex(a.split(" ")[0])));
+
+
+                sortedMonths.forEach(monthYear => {
+                    const monthHeader = document.createElement('div');
+                    monthHeader.classList.add('transaction-month-header');
+                    monthHeader.textContent = monthYear;
+                    completedTransactionsList.appendChild(monthHeader);
+
+                    transactionsByMonth[monthYear].forEach(notif => {
+                        const item = document.createElement('div');
+                        item.classList.add('transaction-item');
+
+                        const iconCircle = document.createElement('div');
+                        iconCircle.classList.add('transaction-icon-circle');
+
+                        const details = document.createElement('div');
+                        details.classList.add('transaction-details');
+
+                        const description = document.createElement('span');
+                        description.classList.add('transaction-description');
+
+                        const amountStatusWrapper = document.createElement('div');
+                        amountStatusWrapper.classList.add('amount-status-wrapper');
+
+                        const amountSpan = document.createElement('span');
+                        amountSpan.classList.add('transaction-amount');
+
+                        let amountPrefix = '';
+                        let amountColor = '#333';
+                        let statusText = '';
+                        let iconClass = 'ph-arrow-up-right';
+
+
+                        const rawAmount = parseFloat(notif.data.amount || notif.data.selectedAmount || '0');
+                        const formattedAmount = rawAmount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                        if (notif.type === 'completed') {
+                            description.textContent = `Send - ${notif.data.recipient || 'Unknown'}`;
+                            amountPrefix = '-₦';
+                        } else if (notif.type === 'failed') {
+                            description.textContent = `Send - ${notif.data.recipient || 'Unknown'}`;
+                            amountPrefix = '-₦';
+                            amountColor = '#777777';
+                            statusText = 'Failed';
+                        } else if (notif.type === 'reversed') {
+                            description.textContent = `Transaction Reversed`;
+                            amountPrefix = '+₦';
+                            iconClass = 'ph-arrow-down-right';
+                        } else if (notif.type === 'incoming_transfer') {
+                            description.textContent = `Received from ${notif.data.senderName || 'Unknown'}`;
+                            amountPrefix = '+₦';
+                            amountColor = 'green';
+                            iconClass = 'ph-arrow-down-right';
+                        }
+
+
+                        iconCircle.innerHTML = `<i class="${iconClass}"></i>`;
+                        amountSpan.textContent = `${amountPrefix}${formattedAmount}`;
+                        amountSpan.style.color = amountColor;
+
+                        amountStatusWrapper.appendChild(amountSpan);
+                        if (statusText) {
+                            const statusSpan = document.createElement('span');
+                            statusSpan.classList.add('transaction-status-text');
+                            statusSpan.textContent = statusText;
+                            amountStatusWrapper.appendChild(statusSpan);
+                        }
+
+                        details.appendChild(description);
+                        details.appendChild(amountStatusWrapper);
+
+                        item.appendChild(iconCircle);
+                        item.appendChild(details);
+                        completedTransactionsList.appendChild(item);
+                    });
+                });
+            }
+
+            function getMonthIndex(monthName) {
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                return months.indexOf(monthName);
+            }
+        });
+    </script>
+</body>
+</html>

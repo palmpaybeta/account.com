@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer to Bank</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            width: 100%;
+            padding-bottom: 80px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            background-color: #FFFFFF !important;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-title {
+            font-size: 18px;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-icons i {
+            margin-left: 15px;
+            cursor: pointer;
+            font-size: 1.6em;
+            color: #555;
+        }
+
+        /* Bank List Styles */
+        #bankListContainer {
+            width: 100%;
+            height: 100vh;
+            overflow-y: scroll;
+            box-sizing: border-box;
+            display: none;
+            flex-direction: column;
+            align-items: stretch;
+            background-color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 200;
+        }
+
+        /* Specific header for the bank list */
+        .bank-list-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 210;
+        }
+
+        .bank-list-header .back-button {
+             font-size: 1.5em;
+             color: #000;
+             text-decoration: none;
+             margin-right: 15px;
+             cursor: pointer;
+        }
+
+        .bank-list-header h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: normal;
+        }
+
+
+        .bank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+            color: #333;
+            box-sizing: border-box;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        .bank-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .percentage {
+            font-weight: bold;
+            color: #AE00FF;
+            min-width: 50px;
+            text-align: right;
+            font-size: 0.9em;
+        }
+
+        .active-bank-list {
+            display: flex !important;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Custom Scrollbar */
+        #bankListContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #bankListContainer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #bankListContainer::-webkit-scrollbar-thumb {
+            background: #AE00FF;
+            border-radius: 4px;
+        }
+
+        #bankListContainer::-webkit-scrollbar-thumb:hover {
+            background: #9000cc;
+        }
+        /* Transaction History Slider */
+        .transaction-history-slider {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: left;
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        .transaction-history-slider.active {
+            transform: translateX(0);
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .slider-content {
+            position: relative;
+        }
+
+        .close-slider {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        .slider-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        /* Styles for pending transaction in slider */
+        .pending-transaction-item {
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .pending-transaction-item .amount {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .pending-transaction-item .status {
+            font-style: italic;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        .pending-transaction-item .details {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.4;
+        }
+        .no-transaction-message {
+            text-align: center;
+            color: #777;
+            margin-top: 30px;
+        }
+
+
+        /* Styles for the clickable words */
+        .clickable-option {
+            position: relative;
+            cursor: pointer;
+            padding-bottom: 5px;
+            width: 50%;
+            text-align: center;
+            color: #777;
+            transition: color 0.3s ease;
+        }
+
+        .clickable-option.active {
+            color: #333;
+        }
+
+         #toOtherBank { text-align: left; padding-left: 5px;}
+         #toPalmpay { text-align: right; padding-right: 5px;}
+
+
+        .clickable-option.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #AE00FF;
+        }
+
+        #inputSection {
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+
+        .input-wrapper {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper label {
+             display: block;
+             font-size: 0.9em;
+             color: #888;
+             margin-bottom: 5px;
+             text-align: left;
+        }
+
+        .input-wrapper input[type="text"],
+        .input-wrapper .fake-input,
+        .input-wrapper .recipient-name-display {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 1.1em;
+            outline: none;
+            background-color: transparent;
+            box-sizing: border-box;
+            color: #333;
+            text-align: left;
+        }
+
+         .input-wrapper input::placeholder {
+            color: #ccc;
+        }
+
+        .input-wrapper .fake-input {
+            cursor: pointer;
+            color: #ccc;
+        }
+
+        .input-wrapper .fake-input.selected {
+             color: #333;
+        }
+         .input-wrapper .recipient-name-display {
+             color: #333;
+             font-weight: bold;
+             padding-top: 5px;
+             min-height: 1.2em;
+         }
+         .input-wrapper .recipient-name-display.verifying {
+            font-weight: normal;
+            color: #777;
+            font-style: italic;
+        }
+         .input-wrapper .recipient-name-display.error {
+             color: #AE00FF;
+             font-weight: normal;
+             font-style: normal;
+         }
+
+
+        /* Styles for the timeout message at the bottom */
+        #timeoutMessage {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            z-index: 1001;
+            display: none;
+            white-space: nowrap;
+        }
+        #timeoutMessage.visible {
+             display: block;
+         }
+
+        /* Beneficiary Section Styles */
+        #beneficiarySection {
+            margin-top: 20px;
+            text-align: center;
+            color: #aaa;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Style for individual beneficiary item */
+        .beneficiary-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .beneficiary-item:hover {
+             background-color: #f9f9f9;
+        }
+
+        .beneficiary-icon-circle {
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             background-color: #AE00FF;
+             color: white;
+             font-size: 1.5em;
+             font-weight: bold;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin-right: 15px;
+             flex-shrink: 0;
+        }
+
+        .beneficiary-details-wrapper {
+             flex-grow: 1;
+             min-width: 0;
+        }
+
+
+        .beneficiary-name-display {
+            font-size: 1em;
+            color: black;
+            font-weight: bold;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .beneficiary-bank-account-row {
+             display: flex;
+             align-items: center;
+             font-size: 0.8em;
+             margin-bottom: 3px;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+        }
+         .beneficiary-bank-name {
+             color: #6800FF;
+             margin-right: 10px;
+         }
+         .beneficiary-account-number {
+             color: #555;
+             white-space: nowrap;
+         }
+
+        .beneficiary-last-transfer-time {
+            font-size: 0.7em;
+            color: #777;
+        }
+
+
+        /* Placeholder style when no beneficiaries */
+        #beneficiarySection.no-beneficiaries-placeholder {
+             border: none;
+             padding: 0;
+             margin-top: 40px;
+             box-shadow: none;
+             background-color: transparent;
+             cursor: default;
+             display: block;
+        }
+
+         #beneficiarySection.no-beneficiaries-placeholder i {
+             font-size: 3em;
+             display: block;
+             margin-bottom: 10px;
+         }
+
+         #beneficiarySection.no-beneficiaries-placeholder p {
+             margin: 0;
+             font-size: 0.9em;
+         }
+
+
+        /* Next Button Styles */
+        .next-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: calc(100% - 40px);
+            max-width: 400px;
+            margin: 20px 20px 0 20px;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: block;
+        }
+
+        .next-button.partially-visible {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .next-button.fully-visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .next-button:hover:not(.partially-visible) {
+            background-color: #9000cc;
+        }
+    </style>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="container">
+        <div class="header transfer_to_bank_page_header">
+             <a href="balance.html" style="font-size: 1.5em; color: #000; text-decoration: none;">&larr;</a>
+            <h1 class="header-title">Transfer</h1>
+            <div class="header-icons">
+                <i id="desktop-icon" class="ph-desktop"></i>
+                <i id="menu-dots" class="ph-dots-three-vertical"></i>
+            </div>
+        </div>
+
+        <div id="defaultContent" style="margin-top: 20px; width: 100%; padding: 0 20px; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-around; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                <div id="toOtherBank" class="clickable-option">To other Bank</div>
+                <div id="toPalmpay" class="clickable-option">To Palmpay</div>
+            </div>
+            <div id="inputSection">
+                <div class="input-wrapper" id="accountInputWrapper">
+                     <label for="accountInput">Account Number</label>
+                     <input type="text" id="accountInput" placeholder="Enter 10 digit account No." inputmode="numeric" pattern="\d{10}" maxlength="10">
+                </div>
+                <div class="input-wrapper" id="bankInputWrapper">
+                    <label>Bank</label>
+                     <div id="selectBankInput" class="fake-input">Select Bank</div>
+                </div>
+                <div class="input-wrapper hidden" id="palmpayBankDisplay" style="margin-bottom: 20px;">
+                     <label>Bank</label>
+                     <div class="auto-filled">Palmpay</div>
+                </div>
+                <div class="input-wrapper hidden" id="recipientNameWrapper">
+                     <label>Recipient Name</label>
+                    <div id="recipientNameDisplay" class="recipient-name-display"></div>
+                </div>
+            </div>
+            <button id="nextButton" class="next-button partially-visible">Next</button>
+
+             <!-- Beneficiary Section - Moved outside inputSection -->
+            <div id="beneficiarySection">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+
+        </div>
+
+        <div id="bankListContainer" class="hidden">
+            <!-- Bank list header and items will be populated here -->
+        </div>
+
+        <div id="transactionHistorySlider" class="transaction-history-slider">
+            <div class="slider-content">
+                <span id="closeSlider" class="close-slider">&times;</span>
+                <h2>Transaction History</h2>
+                <div id="sliderTransactionContent">
+                    <p class="no-transaction-message">No transactions yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="timeoutMessage" class="hidden">#400_request_timeout</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const desktopIcon = document.getElementById('desktop-icon');
+            const bankListContainer = document.getElementById('bankListContainer');
+            const menuDots = document.getElementById('menu-dots');
+            const transactionHistorySlider = document.getElementById('transactionHistorySlider');
+            const closeSlider = document.getElementById('closeSlider');
+            const toOtherBank = document.getElementById('toOtherBank');
+            const toPalmpay = document.getElementById('toPalmpay');
+            const accountInputWrapper = document.getElementById('accountInputWrapper');
+            const bankInputWrapper = document.getElementById('bankInputWrapper');
+            const palmpayBankDisplay = document.getElementById('palmpayBankDisplay');
+            const selectBankInput = document.getElementById('selectBankInput');
+            const accountInput = document.getElementById('accountInput');
+            const recipientNameWrapper = document.getElementById('recipientNameWrapper');
+            const recipientNameDisplay = document.getElementById('recipientNameDisplay');
+            const timeoutMessage = document.getElementById('timeoutMessage');
+            const beneficiarySection = document.getElementById('beneficiarySection');
+            const sliderTransactionContent = document.getElementById('sliderTransactionContent');
+            const nextButton = document.getElementById('nextButton');
+
+            let nameFetchTimeout;
+            let timeoutMessageTimeout;
+            let bankListVisible = false;
+            let activeTab = 'otherBank';
+            let longPressTimer;
+            const LONG_PRESS_THRESHOLD = 2000;
+            const AUTO_NEXT_DELAY = 2000;
+
+            const BANK_NAMES = [
+                "Access Bank", "Citibank", "Ecobank", "Fidelity Bank", "First Bank",
+                "FCMB (First City Monument Bank)", "Globus Bank", "GTBank (Guaranty Trust Bank)",
+                "Heritage Bank", "Jaiz Bank", "Keystone Bank", "Kuda Bank", "LOTUS Bank",
+                "Moniepoint MFB", "Momo PSB", "Opay", "Palmpay",
+                "Parallex Bank", "Polaris Bank",
+                "PremiumTrust Bank", "Providus Bank", "Stanbic IBTC Bank", "Standard Chartered Bank",
+                "Sterling Bank", "Suntrust Bank", "Smartcash PSB", "Taj Bank", "Tenn",
+                "Titan Trust Bank", "Union Bank", "UBA (United Bank for Africa)",
+                "Unity Bank", "VFD Microfinance Bank", "Wema Bank", "Zenith Bank"
+            ].sort();
+            const VERIFICATION_DELAY_MIN = 1000;
+            const VERIFICATION_DELAY_MAX = 3000;
+            const SAVED_BENEFICIARY_DELAY_MIN = 3000;
+            const SAVED_BENEFICIARY_DELAY_MAX = 5000;
+            const TIMEOUT_MESSAGE_DURATION = 5000;
+
+            function formatLastTransferTimestamp(timestamp) {
+                if (!timestamp) return '';
+                const date = new Date(timestamp);
+                const options = {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                };
+                const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(date);
+                const month = parts.find(p => p.type === 'month').value;
+                const day = parts.find(p => p.type === 'day').value;
+                const year = parts.find(p => p.type === 'year').value;
+                const hour = parts.find(p => p.type === 'hour').value;
+                const minute = parts.find(p => p.type === 'minute').value;
+                const ampm = parts.find(p => p.type === 'dayPeriod').value;
+
+                return `${month} ${day}, ${year} ${hour}:${minute} ${ampm}`;
+            }
+
+            const displayCompletedBeneficiaries = () => {
+                const currentUserPhone = localStorage.getItem('currentUserPhone');
+                const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+
+                beneficiarySection.innerHTML = '';
+                beneficiarySection.classList.remove('no-beneficiaries-placeholder');
+                beneficiarySection.style.display = 'flex';
+
+                const completedTransfers = userSimulatedNotifications.filter(notif =>
+                    notif.type === 'completed' && notif.data && notif.data.recipient && notif.data.account && notif.data.bank && notif.data.bank !== 'Palmpay'
+                );
+
+                if (completedTransfers.length > 0) {
+                    const beneficiariesMap = completedTransfers.reduce((acc, notification) => {
+                        const beneficiary = notification.data;
+                        const key = `${beneficiary.bank}-${beneficiary.account}`;
+                        if (!acc[key] || notification.timestamp > acc[key].timestamp) {
+                            acc[key] = { ...beneficiary, timestamp: notification.timestamp }; 
+                        }
+                        return acc;
+                    }, {});
+
+                    const uniqueBeneficiaries = Object.values(beneficiariesMap);
+
+                    uniqueBeneficiaries.sort((a, b) => b.timestamp - a.timestamp);
+
+                    uniqueBeneficiaries.forEach(beneficiary => {
+                        const beneficiaryItem = document.createElement('div');
+                        beneficiaryItem.classList.add('beneficiary-item');
+                        beneficiaryItem.dataset.account = beneficiary.account;
+                        beneficiaryItem.dataset.bank = beneficiary.bank;
+                        beneficiaryItem.dataset.name = beneficiary.recipient;
+
+                        const iconCircle = document.createElement('div');
+                        iconCircle.classList.add('beneficiary-icon-circle');
+                        iconCircle.textContent = beneficiary.bank ? beneficiary.bank.charAt(0).toUpperCase() : '?';
+                        beneficiaryItem.appendChild(iconCircle);
+
+                        const detailsWrapper = document.createElement('div');
+                        detailsWrapper.classList.add('beneficiary-details-wrapper');
+
+                        const nameDiv = document.createElement('div');
+                        nameDiv.classList.add('beneficiary-name-display');
+                        nameDiv.textContent = beneficiary.recipient || 'Unknown'; 
+                        detailsWrapper.appendChild(nameDiv);
+
+                        const bankAccountRow = document.createElement('div');
+                        bankAccountRow.classList.add('beneficiary-bank-account-row');
+
+                        const bankSpan = document.createElement('span');
+                        bankSpan.classList.add('beneficiary-bank-name');
+                        bankSpan.textContent = beneficiary.bank || 'Bank';
+                        bankAccountRow.appendChild(bankSpan);
+
+                        const accountSpan = document.createElement('span');
+                        accountSpan.classList.add('beneficiary-account-number');
+                        accountSpan.textContent = beneficiary.account || 'Account';
+                        bankAccountRow.appendChild(accountSpan);
+
+                        detailsWrapper.appendChild(bankAccountRow);
+
+                        const timestampDiv = document.createElement('div');
+                        timestampDiv.classList.add('beneficiary-last-transfer-time');
+                        timestampDiv.textContent = `last transfer on ${formatLastTransferTimestamp(beneficiary.timestamp)}`;
+                        detailsWrapper.appendChild(timestampDiv);
+
+                        beneficiaryItem.appendChild(detailsWrapper);
+                        beneficiarySection.appendChild(beneficiaryItem);
+
+                        beneficiaryItem.addEventListener('click', handleBeneficiaryClick);
+                    });
+                } else {
+                    beneficiarySection.innerHTML = `
+                        <i class="ph-clipboard"></i>
+                        <p>No transaction beneficiary yet</p>
+                    `;
+                    beneficiarySection.classList.add('no-beneficiaries-placeholder');
+                }
+            };
+
+            const handleBeneficiaryClick = (event) => {
+                const clickedItem = event.currentTarget;
+                const account = clickedItem.dataset.account;
+                const bank = clickedItem.dataset.bank;
+                const name = clickedItem.dataset.name;
+
+                localStorage.setItem('transferRecipientName', name);
+                localStorage.setItem('transferAccountNumber', account);
+                localStorage.setItem('transferBankName', bank);
+
+                window.location.href = 'transfer_amount.html';
+            };
+
+            const populateBankList = () => { 
+                bankListContainer.innerHTML = '';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.classList.add('bank-list-header');
+                const backButton = document.createElement('a');
+                backButton.href = '#';
+                backButton.classList.add('back-button');
+                backButton.innerHTML = '&larr;';
+                backButton.addEventListener('click', (e) => { e.preventDefault(); hideBankList(); });
+                headerDiv.appendChild(backButton);
+                const headerTitle = document.createElement('h2');
+                headerTitle.textContent = 'Select Bank'; 
+                headerDiv.appendChild(headerTitle);
+                bankListContainer.appendChild(headerDiv);
+
+                BANK_NAMES.forEach(bankName => {
+                    const bankItem = document.createElement('div');
+                    bankItem.classList.add('bank-item');
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = bankName;
+                    bankItem.appendChild(nameSpan);
+
+                    bankItem.addEventListener('touchstart', (event) => {
+                        longPressTimer = setTimeout(() => {
+                            const selectedBankName = bankItem.querySelector('span').textContent;
+                            localStorage.setItem('beneficiaryBankName', selectedBankName); 
+                            window.location.href = 'add_bank_beneficiary.html?bankName=' + encodeURIComponent(selectedBankName);
+                        }, LONG_PRESS_THRESHOLD);
+                    });
+
+                    bankItem.addEventListener('touchend', () => {
+                        clearTimeout(longPressTimer);
+                    });
+
+                    bankItem.addEventListener('click', () => {
+                        clearTimeout(longPressTimer); 
+                        selectBankInput.textContent = bankName;
+                        selectBankInput.classList.add('selected');
+                        hideBankList();
+                        verifyRecipient(); 
+                    });
+
+                    bankListContainer.appendChild(bankItem);
+                });
+            };
+
+            const showBankList = () => { 
+                populateBankList(); 
+                bankListContainer.classList.remove('hidden');
+                bankListContainer.classList.add('active-bank-list');
+                bankListVisible = true;
+            };
+
+            const hideBankList = () => {
+                bankListContainer.classList.remove('active-bank-list');
+                bankListContainer.classList.add('hidden');
+                bankListVisible = false;
+            };
+
+            const showTimeoutMessage = () => {
+                timeoutMessage.classList.remove('hidden');
+                timeoutMessage.classList.add('visible');
+                clearTimeout(timeoutMessageTimeout); 
+                timeoutMessageTimeout = setTimeout(hideTimeoutMessage, TIMEOUT_MESSAGE_DURATION);
+            };
+
+            const hideTimeoutMessage = () => {
+                timeoutMessage.classList.remove('visible');
+                timeoutMessage.classList.add('hidden');
+            };
+
+            const verifyRecipient = () => {
+                const accountValue = accountInput.value.trim();
+                const accountValid = accountValue.length === 10 && /^\d+$/.test(accountValue);
+                const bankSelected = activeTab === 'palmpay' || (selectBankInput.classList.contains('selected') && selectBankInput.textContent !== 'Select Bank');
+                const selectedBankName = activeTab === 'palmpay' ? 'Palmpay' : selectBankInput.textContent;
+                const currentUserPhone = localStorage.getItem('currentUserPhone'); 
+
+                clearTimeout(nameFetchTimeout);
+
+                if (!accountValid || !bankSelected) {
+                    recipientNameWrapper.classList.add('hidden');
+                    recipientNameDisplay.textContent = '';
+                    recipientNameDisplay.classList.remove('verifying', 'error');
+                    nextButton.classList.remove('fully-visible');
+                    nextButton.classList.add('partially-visible');
+                    hideTimeoutMessage();
+                    return;
+                }
+
+                recipientNameWrapper.classList.remove('hidden');
+                recipientNameDisplay.textContent = 'Verifying...';
+                recipientNameDisplay.classList.add('verifying');
+                recipientNameDisplay.classList.remove('error');
+                nextButton.classList.remove('fully-visible');
+                nextButton.classList.add('partially-visible');
+                hideTimeoutMessage();
+
+                if (currentUserPhone) {
+                    const userSpecificBeneficiariesKey = `user_data_${currentUserPhone}_savedBeneficiaries`;
+                    const userSavedBeneficiaries = JSON.parse(localStorage.getItem(userSpecificBeneficiariesKey) || '[]');
+                    const matchedUserBeneficiary = userSavedBeneficiaries.find(b =>
+                        b.bank === selectedBankName && b.account === accountValue
+                    );
+
+                    if (matchedUserBeneficiary) {
+                        const randomDelay = Math.random() * (VERIFICATION_DELAY_MAX - VERIFICATION_DELAY_MIN) + VERIFICATION_DELAY_MIN; 
+                        nameFetchTimeout = setTimeout(() => {
+                            recipientNameDisplay.textContent = matchedUserBeneficiary.name;
+                            recipientNameDisplay.classList.remove('verifying', 'error');
+                            nextButton.classList.remove('partially-visible');
+                            nextButton.classList.add('fully-visible');
+                        }, randomDelay / 2); 
+                        return; 
+                    }
+                }
+
+                if (activeTab === 'palmpay') {
+                    const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+                    const palmpayUserExists = adminAddedUsers.some(user => user.phone === accountValue);
+
+                    if (palmpayUserExists) {
+                        const recipientFullName = localStorage.getItem(`user_data_${accountValue}_userFullName`);
+                        const recipientFirstName = localStorage.getItem(`user_data_${accountValue}_userFirstName`);
+                        const nameToDisplay = recipientFullName || recipientFirstName || `Palmpay User (${accountValue.slice(0,3)}...${accountValue.slice(-2)})`;
+
+                        const randomDelay = Math.random() * (VERIFICATION_DELAY_MAX - VERIFICATION_DELAY_MIN) + VERIFICATION_DELAY_MIN;
+                        nameFetchTimeout = setTimeout(() => {
+                            recipientNameDisplay.textContent = nameToDisplay;
+                            recipientNameDisplay.classList.remove('verifying', 'error');
+                            nextButton.classList.remove('partially-visible');
+                            nextButton.classList.add('fully-visible');
+                        }, randomDelay);
+                    } else {
+                        const randomDelay = Math.random() * (VERIFICATION_DELAY_MAX - VERIFICATION_DELAY_MIN) + VERIFICATION_DELAY_MIN;
+                        nameFetchTimeout = setTimeout(() => {
+                            recipientNameDisplay.textContent = 'Palmpay user not found';
+                            recipientNameDisplay.classList.remove('verifying');
+                            recipientNameDisplay.classList.add('error');
+                            nextButton.classList.add('partially-visible');
+                            nextButton.classList.remove('fully-visible');
+                        }, randomDelay);
+                    }
+                } else { 
+                    const randomDelay = Math.random() * (VERIFICATION_DELAY_MAX - VERIFICATION_DELAY_MIN) + VERIFICATION_DELAY_MIN;
+                    nameFetchTimeout = setTimeout(() => {
+                        recipientNameDisplay.textContent = '#400_request_timeout';
+                        recipientNameDisplay.classList.remove('verifying');
+                        recipientNameDisplay.classList.add('error');
+                        nextButton.classList.add('partially-visible');
+                        nextButton.classList.remove('fully-visible');
+                        showTimeoutMessage();
+                    }, randomDelay);
+                }
+            };
+
+            const initEventListeners = () => {
+                desktopIcon.addEventListener('click', () => showBankList());
+                menuDots.addEventListener('click', () => {
+                    transactionHistorySlider.classList.add('active');
+                });
+                closeSlider.addEventListener('click', () => {
+                    transactionHistorySlider.classList.remove('active');
+                });
+
+                toOtherBank.addEventListener('click', () => setActiveTab('otherBank'));
+                toPalmpay.addEventListener('click', () => setActiveTab('palmpay'));
+
+                selectBankInput.addEventListener('click', () => {
+                    if (activeTab === 'otherBank') {
+                        showBankList();
+                    }
+                });
+
+                accountInput.addEventListener('input', verifyRecipient);
+                selectBankInput.click = () => verifyRecipient();
+
+                nextButton.addEventListener('click', () => {
+                    if (nextButton.classList.contains('fully-visible')) {
+                        clearTimeout(nameFetchTimeout);
+                        hideTimeoutMessage();
+
+                        const recipientName = recipientNameDisplay.textContent;
+                        const accountNumber = accountInput.value;
+                        const bankName = (activeTab === 'palmpay') ? 'Palmpay' : selectBankInput.textContent;
+
+                        localStorage.setItem('transferRecipientName', recipientName);
+                        localStorage.setItem('transferAccountNumber', accountNumber);
+                        localStorage.setItem('transferBankName', bankName);
+
+                        accountInput.value = '';
+                        selectBankInput.textContent = 'Select Bank';
+                        selectBankInput.classList.remove('selected');
+                        recipientNameDisplay.textContent = '';
+                        recipientNameWrapper.classList.add('hidden');
+                        nextButton.classList.remove('fully-visible');
+                        nextButton.classList.add('partially-visible');
+
+                        window.location.href = 'transfer_amount.html';
+                    }
+                });
+            };
+
+            const setActiveTab = (tab) => {
+                if (activeTab === tab) return;
+
+                activeTab = tab;
+                const isOtherBank = tab === 'otherBank';
+
+                toOtherBank.classList.toggle('active', isOtherBank);
+                toPalmpay.classList.toggle('active', !isOtherBank);
+                bankInputWrapper.classList.toggle('hidden', !isOtherBank);
+
+                selectBankInput.textContent = 'Select Bank';
+                selectBankInput.classList.remove('selected');
+                accountInput.value = '';
+                clearTimeout(nameFetchTimeout);
+                hideTimeoutMessage();
+                recipientNameWrapper.classList.add('hidden');
+                recipientNameDisplay.textContent = '';
+                recipientNameDisplay.classList.remove('verifying', 'error');
+                nextButton.classList.remove('fully-visible');
+                nextButton.classList.add('partially-visible');
+
+                verifyRecipient(); 
+                displayCompletedBeneficiaries();
+            };
+
+            const initPage = () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode'); 
+                if (mode === 'palmpay') {
+                    setActiveTab('palmpay');
+                } else {
+                    setActiveTab('otherBank'); 
+                }
+
+                initEventListeners();
+                displayCompletedBeneficiaries();
+            };
+
+            initPage();
+        });
+    </script>
+</body>
+</html>

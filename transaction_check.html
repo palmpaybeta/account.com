@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checking Transaction</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .checking {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Rolling dot animation styles */
+        #rollingAnimation {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .dot {
+            width: 15px;
+            height: 15px;
+            background-color: #AE00FF;
+            border-radius: 50%;
+            position: absolute;
+            animation: rolling 2s linear infinite;
+        }
+
+        @keyframes rolling {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(35px); }
+            50% { transform: translateX(35px); }
+            75% { transform: translateX(0); }
+            100% { transform: translateX(0); }
+        }
+    </style>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="checking">
+        <p>Checking our System record to confirm your payment...</p>
+        <!-- Replace with rolling fit animation -->
+        <div id="rollingAnimation">
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div id="result" class="result hidden">
+        <h2>Payment not yet received <i class="ph-clock"></i></h2>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultDiv = document.getElementById('result');
+            const rollingAnimationDiv = document.getElementById('rollingAnimation');
+
+            const delay = Math.random() * 5000 + 10000; // Random delay between 10 and 15 seconds
+
+            setTimeout(() => {
+                rollingAnimationDiv.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+
+                // Store transaction info in local storage
+                const fullName = localStorage.getItem('fullName');
+                const userPhone = localStorage.getItem('userPhone');
+                const selectedAmount = localStorage.getItem('selectedAmount');
+
+                // Add pending deposit notification to simulatedNotifications
+                const simulatedNotifications = JSON.parse(localStorage.getItem('simulatedNotifications') || '[]');
+
+                // Check if a similar pending deposit notification already exists
+                const existingPendingIndex = simulatedNotifications.findIndex(
+                    notif => notif.type === 'pending_deposit' &&
+                             notif.data.fullName === fullName &&
+                             notif.data.selectedAmount === selectedAmount
+                );
+
+                if (existingPendingIndex !== -1) {
+                    // Update timestamp if it exists
+                    simulatedNotifications[existingPendingIndex].timestamp = Date.now();
+                } else {
+                    // Add new pending deposit notification
+                     simulatedNotifications.push({
+                         type: 'pending_deposit',
+                         timestamp: Date.now(), // Add timestamp here
+                         data: {
+                            fullName: fullName,
+                            userPhone: userPhone,
+                            selectedAmount: selectedAmount
+                         }
+                     });
+                }
+
+                localStorage.setItem('simulatedNotifications', JSON.stringify(simulatedNotifications));
+
+                // Remove the old pendingTransaction key
+                localStorage.removeItem('pendingTransaction');
+
+                // Redirect to balance page
+                window.location.href = 'balance.html';
+
+            }, delay);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Name</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            min-height: 100vh;
+        }
+        .edit-name-container {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-grow: 1; 
+        }
+         /* Simple header */
+        .edit-name-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 0;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             z-index: 10;
+             margin-bottom: 20px;
+         }
+        .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .instruction-text {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .edit-name-input-wrapper {
+            margin-bottom: 20px;
+        }
+        #new-name-input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            font-size: 1.1em;
+            outline: none;
+            background-color: transparent;
+            box-sizing: border-box;
+            transition: border-bottom-color 0.3s ease;
+        }
+        #new-name-input:focus {
+            border-bottom-color: #AE00FF;
+        }
+        .save-button-container {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #save-name-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px; 
+            display: block; 
+            margin: 0 auto; 
+            opacity: 0.5; 
+            pointer-events: none; 
+            transition: opacity 0.3s ease;
+        }
+        #save-name-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #save-name-button:hover:not(.visible) {
+             background-color: #AE00FF; 
+        }
+        #save-name-button:hover.visible {
+            background-color: #9000cc;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="edit-name-container">
+        <div class="edit-name-header">
+            <a href="settings.html" class="back-link">&larr;</a>
+            <h1 class="header-title">Edit Name</h1>
+        </div>
+        <p class="instruction-text">write the new name you want us to refer you as</p>
+        <div class="edit-name-input-wrapper">
+            <input type="text" id="new-name-input" placeholder="First and Last Name">
+        </div>
+    </div>
+    <div class="save-button-container">
+        <button id="save-name-button">Save</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const newNameInput = document.getElementById('new-name-input');
+            const saveNameButton = document.getElementById('save-name-button');
+
+            newNameInput.addEventListener('input', function() {
+                if (newNameInput.value.trim().length > 4) {
+                    saveNameButton.classList.add('visible');
+                } else {
+                    saveNameButton.classList.remove('visible');
+                }
+            });
+
+            saveNameButton.addEventListener('click', function() {
+                if (!saveNameButton.classList.contains('visible')) {
+                    return;
+                }
+                const currentUserPhone = localStorage.getItem('currentUserPhone');
+                const fullName = newNameInput.value.trim();
+                if (fullName && currentUserPhone) {
+                    const firstName = fullName.split(' ')[0];
+                    localStorage.setItem(`user_data_${currentUserPhone}_userFirstName`, firstName);
+                    localStorage.setItem(`user_data_${currentUserPhone}_userFullName`, fullName);
+                    console.log(`Saved first name: ${firstName}, Full name: ${fullName} for user ${currentUserPhone}`);
+                    window.location.href = 'profile.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

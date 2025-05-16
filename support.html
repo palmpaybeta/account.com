@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0; /* Milk background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items from the top */
+            min-height: 100vh;
+            color: #333;
+            padding-top: 60px; /* Add space for fixed header */
+            box-sizing: border-box;
+        }
+
+        .support-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 20px;
+             background-color: #f0f0f0; /* Match body background */
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             left: 0;
+             z-index: 10;
+             border-bottom: 1px solid #eee;
+             justify-content: space-between; 
+         }
+
+        .support-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+             margin-right: auto; /* Push title to center */
+        }
+
+        .support-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+             margin: 0 auto; /* Center the title */
+        }
+
+        /* Dummy element for centering */
+        .support-header .placeholder {
+            width: 1.5em; /* Same width as back arrow */
+             margin-left: auto; /* Push title to center */
+        }
+
+
+        .support-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 90%; /* Adjusted width */
+            max-width: 500px;
+            flex-grow: 1; /* Allow content to expand */
+            display: flex; /* Use flex for message layout */
+            flex-direction: column; /* Messages stack vertically */
+            overflow-y: auto; /* Add scroll for messages */
+            margin-bottom: 80px; /* Space for input container */
+        }
+
+         .chat-message {
+             margin-bottom: 10px;
+             padding: 8px 12px;
+             border-radius: 15px;
+             max-width: 80%;
+             word-wrap: break-word;
+             text-align: left;
+         }
+
+         .chat-message.user {
+             align-self: flex-end; /* Align user messages to the right */
+             background-color: #AE00FF; /* Palmpay theme color */
+             color: white;
+             border-bottom-right-radius: 2px; /* Slightly flat edge */
+         }
+
+         .chat-message.system {
+             align-self: flex-start; /* Align system/admin messages to the left */
+             background-color: #e0e0e0; /* Light grey */
+             color: #333;
+             border-bottom-left-radius: 2px; /* Slightly flat edge */
+         }
+
+         .chat-message .timestamp {
+             display: block;
+             font-size: 0.7em;
+             color: rgba(255, 255, 255, 0.8); /* Lighter color for user timestamps */
+             margin-top: 3px;
+             text-align: right;
+         }
+         .chat-message.system .timestamp {
+              color: rgba(51, 51, 51, 0.8); /* Lighter color for system timestamps */
+         }
+
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 25px; /* Pill shape */
+            padding: 5px 15px;
+            width: 90%; /* Match support-content width */
+            max-width: 500px;
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white; /* Ensure background is white */
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 20;
+        }
+
+        .support-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            padding: 8px 0;
+            font-size: 1em;
+            background-color: transparent;
+        }
+
+        .send-icon {
+            color: #AE00FF;
+            cursor: pointer;
+            font-size: 1.5em;
+            padding: 5px;
+            visibility: hidden;
+            margin-left: 10px;
+            transition: color 0.2s ease;
+        }
+         .send-icon:hover.visible {
+             color: #9000cc;
+         }
+
+        .send-icon.visible {
+            visibility: visible;
+        }
+    </style>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+     <div class="support-header">
+         <a href="#" id="back-link" class="back-link">&larr;</a>
+         <h1 class="header-title">Contact Support</h1>
+         <div class="placeholder"></div> <!-- Dummy element -->
+     </div>
+
+    <div id="chat-box" class="support-content">
+        <!-- Messages will be appended here -->
+    </div>
+
+    <div class="input-container">
+        <input type="text" id="support-input" class="support-input" placeholder="Type your message here">
+        <i id="send-icon" class="ph-paper-plane-tilt send-icon"></i> <!-- Changed icon -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const supportInput = document.getElementById('support-input');
+            const sendIcon = document.getElementById('send-icon');
+            const chatBox = document.getElementById('chat-box');
+            const backLink = document.getElementById('back-link');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const sourceParam = urlParams.get('source'); // source page, e.g., 'login' or 'profile'
+            const userPhone = localStorage.getItem('userPhone') || 'Unknown User';
+
+            // Load existing messages for this request ID or user phone
+            let supportRequests = JSON.parse(localStorage.getItem('supportRequests') || '[]');
+            let currentRequest = null;
+
+            // If coming from user pages (login or profile), find an open request for this user phone
+            // An open request is one with status 'new' or 'in_progress' from the same source
+            currentRequest = supportRequests.find(req =>
+                req.userPhone === userPhone && req.source === sourceParam && (req.status === 'new' || req.status === 'in_progress')
+            );
+            // Determine back link based on source
+            backLink.href = sourceParam === 'profile' ? 'profile.html' : 'index.html';
+
+            // If no current request found, create a new one
+            if (!currentRequest && sourceParam) { 
+                 currentRequest = {
+                     id: Date.now(), 
+                     userPhone: userPhone,
+                     source: sourceParam, 
+                     status: 'new',
+                     messages: []
+                 };
+                 supportRequests.push(currentRequest);
+                 localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+            } else if (!currentRequest && !sourceParam) {
+                 console.error("Support page accessed without a source parameter.");
+                 chatBox.innerHTML = '<div class="chat-message system">Error: Page accessed incorrectly. Please return to the previous page.</div>';
+                 supportInput.disabled = true;
+                 sendIcon.style.visibility = 'hidden';
+                 backLink.href = 'index.html'; 
+                 return; 
+            }
+
+            function formatTimestamp(timestamp) {
+                const date = new Date(timestamp);
+                const hours = date.getHours();
+                const minutes = date.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12;
+                const displayHours = formattedHours ? formattedHours : 12; 
+                const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+                return `${displayHours}:${displayMinutes} ${ampm}`;
+            }
+
+            function displayMessages() {
+                chatBox.innerHTML = ''; 
+
+                if (!currentRequest || !currentRequest.messages || currentRequest.messages.length === 0) {
+                     chatBox.innerHTML = '<div class="chat-message system">No messages in this conversation yet.</div>';
+                     return;
+                }
+
+                currentRequest.messages.forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('chat-message');
+                    messageElement.classList.add(msg.sender === 'user' ? 'user' : 'system');
+                    messageElement.innerHTML = `${msg.text}<span class="timestamp">${formatTimestamp(msg.timestamp)}</span>`;
+                    chatBox.appendChild(messageElement);
+                });
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            displayMessages();
+
+            supportInput.addEventListener('input', function() {
+                sendIcon.classList.toggle('visible', supportInput.value.trim().length > 0);
+            });
+
+            sendIcon.addEventListener('click', function() {
+                const userMessage = supportInput.value.trim();
+
+                if (userMessage === '' || !currentRequest) {
+                    return;
+                }
+
+                currentRequest.messages.push({
+                    sender: 'user',
+                    text: userMessage,
+                    timestamp: Date.now()
+                });
+
+                let responseMessage = '';
+                 if (currentRequest.source === 'login') {
+                     responseMessage = `Thank you for your message. To help you with your login issue, please provide the Gmail address linked to your account.`;
+                     if (userMessage.includes('@')) {
+                           responseMessage = `Thank you for providing your Gmail (${userMessage}), we will send you a message regarding your login issue.`;
+                      }
+
+                 } else if (currentRequest.source === 'profile') {
+                    responseMessage = "Hello Dear user, your message has been sent to the Palmpay beta community and an agent will reply you within an hour or less. You can check back later.";
+                 } else {
+                     responseMessage = "Your message has been received. A support agent will contact you shortly.";
+                 }
+
+                currentRequest.messages.push({
+                    sender: 'auto', 
+                    text: responseMessage,
+                    timestamp: Date.now() + 1000 
+                });
+
+                if (currentRequest.status === 'new') {
+                     currentRequest.status = 'in_progress';
+                 }
+
+                const requestIndex = supportRequests.findIndex(req => req.id === currentRequest.id);
+                 if (requestIndex !== -1) {
+                     supportRequests[requestIndex] = currentRequest;
+                     localStorage.setItem('supportRequests', JSON.stringify(supportRequests));
+                 } else {
+                     console.error("Could not find current request in list to update.");
+                 }
+
+                displayMessages();
+
+                supportInput.value = '';
+                sendIcon.classList.remove('visible');
+            });
+
+            supportInput.addEventListener('keypress', function(event) {
+                 if (event.key === 'Enter') {
+                      event.preventDefault(); 
+                      sendIcon.click(); 
+                 }
+             });
+
+            supportInput.dispatchEvent(new Event('input')); 
+        });
+    </script>
+</body>
+</html>

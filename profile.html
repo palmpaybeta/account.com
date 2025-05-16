@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        /* Existing profile styles ... */
+        body {
+            background-color: #f0f0f0;
+        }
+
+        .profile-container {
+            padding-bottom: 100px; /* Increase padding to avoid overlap with nav */
+        }
+
+        .profile-header-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 20px 15px;
+            padding: 15px 20px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .profile-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-greeting {
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .profile-header-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .profile-header-icons i {
+            line-height: 0;
+        }
+
+        .profile-balance-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0 15px 15px 15px; /* Reduce bottom margin */
+            padding: 15px 20px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            text-align: left;
+        }
+
+        .profile-balance-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .profile-balance-amount {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .profile-option-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 15px 15px 0 15px;
+            padding: 15px 20px;
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .profile-option-box:hover {
+            background-color: #f9f9f9;
+        }
+
+        .profile-option-content {
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .regulatory-info-box {
+            position: fixed;
+            bottom: 80px; /* Position above the bottom nav */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8em;
+            color: #888;
+            padding: 10px 0;
+            background-color: #f0f0f0; /* Match body background */
+        }
+
+        .regulatory-info-box p {
+             margin: 2px 0;
+        }
+
+        .cbn-logo, .ndic {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .version-info {
+            position: fixed;
+            bottom: 65px; /* Position just above the bottom nav */
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.7em;
+            color: #aaa;
+            padding-bottom: 5px;
+            background-color: #f0f0f0;
+        }
+
+        /* New styles for Latest Activity Box */
+        .latest-activity-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0 15px 15px 15px; /* Add margin below */
+            padding: 10px 15px; /* Adjust padding */
+            width: calc(100% - 30px);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9em; /* Base font size */
+        }
+
+        .latest-activity-box:hover {
+             background-color: #f9f9f9;
+        }
+
+
+        .latest-activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px; /* Reduced margin */
+        }
+
+        #latest-activity-label {
+            font-size: 1em; /* Relative to parent */
+            color: #555; /* Darker gray */
+            font-weight: normal; /* Normal weight */
+            overflow: hidden; /* Prevent overflow */
+            text-overflow: ellipsis; /* Add ellipsis if too long */
+            white-space: nowrap; /* Keep on one line */
+            max-width: 85%; /* Limit width */
+        }
+
+        .latest-activity-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; /* Vertically align amount and time */
+        }
+
+        #latest-activity-amount {
+            font-size: 1.1em; /* Relative to parent, slightly larger */
+            font-weight: bold;
+            color: #333; /* Black */
+        }
+
+        #latest-activity-timestamp {
+            font-size: 0.8em; /* Relative to parent, smaller */
+            color: #777;
+            text-align: right;
+            white-space: nowrap; /* Prevent wrapping */
+        }
+
+        /* Adjust margin for profile-option-box to accommodate the new box */
+        /* Already handled by margin on latest-activity-box */
+
+        /* Hide the original pending-transaction-box */
+        #pending-transaction-box {
+            display: none !important;
+        }
+
+        /* Ensure bottom nav styles are correct */
+        #bottom-nav {
+             position: fixed;
+             bottom: 0;
+             left: 0;
+             width: 100%;
+             background-color: #fff;
+             border-top: 1px solid #ccc;
+             box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+             z-index: 500;
+             padding: 10px 0;
+             border-radius: 0;
+         }
+
+         #bottom-nav .bottom-icons-row {
+             display: flex;
+             justify-content: space-around;
+             width: 100%;
+         }
+
+         #bottom-nav .icon-item {
+             width: 30%; /* Distribute space */
+         }
+          #bottom-nav .icon-item.active i {
+             color: #AE00FF; /* Active color */
+         }
+         #bottom-nav .icon-item i {
+             color: #777; /* Default icon color */
+         }
+
+         /* New style for Dark Mode button */
+        #dark-mode-box .profile-option-content .ph-moon,
+        #dark-mode-box .profile-option-content .ph-sun {
+            font-size: 1.5em;
+            color: #AE00FF; /* Default icon color */
+            margin-right: 10px;
+        }
+        body.dark-mode #dark-mode-box .profile-option-content .ph-moon,
+        body.dark-mode #dark-mode-box .profile-option-content .ph-sun {
+             color: var(--dark-active-icon-color); /* Dark mode icon color */
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div id="rollingAnimation">
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-header-box">
+            <div class="profile-header-content">
+                <div class="profile-greeting">Hi, <span id="profile-user-phone"></span></div>
+                <div class="profile-header-icons">
+                    <i id="scan-icon" class="ph-scan" style="font-size: 1.5em; cursor: pointer; color: #555;"></i>
+                    <i id="settings-icon" class="ph-gear" style="font-size: 1.5em; cursor: pointer; margin-left: 15px; color: #555;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-balance-box">
+            <div class="profile-balance-label">Total asset</div>
+            <div class="profile-balance-amount"><span id="profile-balance">₦0.00</span></div>
+        </div>
+
+        <!-- New Latest Activity Box -->
+        <div id="latest-activity-box" class="latest-activity-box hidden">
+             <div class="latest-activity-header">
+                <span id="latest-activity-label">Latest Activity</span>
+                <i class="ph-caret-right" style="font-size: 1.2em; color: #ccc;"></i>
+             </div>
+             <div class="latest-activity-details">
+                 <span id="latest-activity-amount"></span>
+                 <span id="latest-activity-timestamp"></span>
+             </div>
+        </div>
+
+        <!-- Customer Service Box -->
+        <div id="customer-service-box" class="profile-option-box">
+            <div class="profile-option-content">
+                <i class="ph-users" style="font-size: 1.5em; color: #AE00FF; margin-right: 10px;"></i>
+                <span>Customer Service</span>
+            </div>
+            <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+        </div>
+
+        <!-- Rate App Box -->
+        <div id="rate-app-box" class="profile-option-box">
+            <div class="profile-option-content">
+                <i class="ph-star" style="font-size: 1.5em; color: #AE00FF; margin-right: 10px;"></i>
+                <span>Rate Palmpay beta</span>
+            </div>
+            <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+        </div>
+
+        <!-- Security Center Box -->
+        <div id="security-center-box" class="profile-option-box">
+            <div class="profile-option-content">
+                <i class="ph-shield" style="font-size: 1.5em; color: #AE00FF; margin-right: 10px;"></i>
+                <span>Security Center</span>
+            </div>
+            <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+        </div>
+
+        <!-- Update Box -->
+        <div id="update-box" class="profile-option-box">
+            <div class="profile-option-content">
+                <i class="ph-arrow-clockwise" style="font-size: 1.5em; color: #AE00FF; margin-right: 10px;"></i>
+                <span>Update</span>
+            </div>
+            <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+        </div>
+
+        <!-- Dark Mode Toggle Box -->
+        <div id="dark-mode-box" class="profile-option-box">
+            <div class="profile-option-content">
+                <i id="dark-mode-icon" class="ph-moon"></i>
+                <span id="dark-mode-text">Dark Mode</span>
+            </div>
+            <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+        </div>
+
+    </div>
+
+    <!-- Regulatory Info Box -->
+    <div class="regulatory-info-box">
+        <p>Licensed by <span class="cbn-logo">CBN</span> as an MMO</p>
+        <p>Deposit insured by <span class="ndic">|NDIC</span></p>
+    </div>
+
+    <div class="version-info">
+        Version 6.4.0
+    </div>
+
+    <!-- Fixed Bottom Navigation -->
+    <div id="bottom-nav">
+        <div class="bottom-icons-row">
+            <div id="nav-home" class="icon-item">
+                <i class="ph-house" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+            <div id="nav-finance" class="icon-item">
+                <i class="ph-money" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+            <div id="nav-profile" class="icon-item active">
+                <i class="ph-user" style="font-size: 2em; cursor: pointer;"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userPhoneDisplay = document.getElementById('profile-user-phone');
+            const balanceDisplay = document.getElementById('profile-balance');
+            const bottomNavItems = document.querySelectorAll('#bottom-nav .icon-item');
+            const navProfile = document.getElementById('nav-profile'); // The current active item
+            const settingsIcon = document.getElementById('settings-icon');
+            const scanIcon = document.getElementById('scan-icon');
+            const customerServiceBox = document.getElementById('customer-service-box');
+            const rateAppBox = document.getElementById('rate-app-box');
+            const profileGreetingDiv = document.querySelector('.profile-greeting');
+            const securityCenterBox = document.getElementById('security-center-box');
+            const updateBox = document.getElementById('update-box');
+            const latestActivityBox = document.getElementById('latest-activity-box'); // Get the new box
+            const latestActivityLabel = document.getElementById('latest-activity-label');
+            const latestActivityAmount = document.getElementById('latest-activity-amount');
+            const latestActivityTimestamp = document.getElementById('latest-activity-timestamp');
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            const darkModeBox = document.getElementById('dark-mode-box');
+            const darkModeIcon = document.getElementById('dark-mode-icon');
+            const darkModeText = document.getElementById('dark-mode-text');
+            const loadingOverlay = document.getElementById('loading-overlay'); // Get loading overlay
+
+            const userFirstName = localStorage.getItem(`user_data_${currentUserPhone}_userFirstName`);
+            const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+            const storedBalance = localStorage.getItem(`user_data_${currentUserPhone}_currentBalance`) || '0.00';
+
+            if (userFirstName) {
+                profileGreetingDiv.textContent = `Hi, ${userFirstName}`;
+            } else {
+                profileGreetingDiv.textContent = `Hi, ${currentUserPhone}`;
+            }
+
+            const balanceVisible = localStorage.getItem(`user_data_${currentUserPhone}_balanceVisible`) !== 'false'; // Default to true if not set
+
+            if (balanceVisible) {
+                balanceDisplay.textContent = '₦' + parseFloat(storedBalance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                const formattedVisibleBalance = parseFloat(storedBalance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                balanceDisplay.textContent = '₦' + '*'.repeat(formattedVisibleBalance.length);
+            }
+
+            function formatTimestamp(timestamp) {
+                if (!timestamp) return '';
+                const date = new Date(timestamp);
+                const now = new Date();
+
+                const diffTime = now.getTime() - date.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                const timeString = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                if (diffDays === 0 && now.getDate() === date.getDate()) {
+                    return `Today ${timeString}`;
+                } else if (diffDays === 1 && now.getDate() - 1 === date.getDate()) {
+                    return `Yesterday ${timeString}`;
+                } else if (diffDays < 7) { // Within the last week but not today/yesterday
+                    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    return `${days[date.getDay()]} ${timeString}`;
+                } else { // Older than a week
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    return `${months[date.getMonth()]} ${date.getDate()}, ${timeString}`;
+                }
+            }
+
+            // Find the most recent relevant notification
+            const relevantNotifications = userSimulatedNotifications
+                .filter(notif => ['completed', 'failed', 'reversed', 'pending_deposit', 'incoming_transfer'].includes(notif.type))
+                .sort((a, b) => b.timestamp - a.timestamp);
+
+            if (relevantNotifications.length > 0) {
+                const mostRecentTx = relevantNotifications[0];
+
+                const amount = parseFloat(mostRecentTx.data.amount || mostRecentTx.data.selectedAmount || '0');
+                const formattedAmount = amount.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                let amountPrefix = '';
+                let activityLabelText = 'Latest Activity'; // Default label
+
+                switch (mostRecentTx.type) {
+                    case 'pending_deposit':
+                        amountPrefix = '+₦';
+                        activityLabelText = 'Pending Deposit';
+                        break;
+                    case 'completed':
+                        amountPrefix = '-₦';
+                        const recipientName = mostRecentTx.data.recipient || 'Unknown';
+                        activityLabelText = `Send - ${recipientName}`;
+                        break;
+                    case 'failed':
+                        amountPrefix = '-₦'; // Or no prefix for failed, depends on desired display
+                        activityLabelText = 'Transaction Failed';
+                        break;
+                    case 'reversed':
+                        amountPrefix = '+₦';
+                        activityLabelText = 'Transaction Reversed';
+                        break;
+                    case 'incoming_transfer': // Added case for incoming transfer
+                        amountPrefix = '+₦';
+                        activityLabelText = `Received from ${mostRecentTx.data.senderName || 'Unknown'}`;
+                        break;
+                }
+
+                latestActivityLabel.textContent = activityLabelText;
+                latestActivityAmount.textContent = `${amountPrefix}${formattedAmount}`;
+                latestActivityTimestamp.textContent = formatTimestamp(mostRecentTx.timestamp);
+
+                latestActivityBox.classList.remove('hidden');
+
+                latestActivityBox.addEventListener('click', () => {
+                    window.location.href = 'notification.html';
+                });
+
+            } else {
+                latestActivityBox.classList.add('hidden');
+            }
+
+            function updateDarkModeButtonVisuals() {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                if (isDarkMode) {
+                    darkModeIcon.className = 'ph-sun';
+                    darkModeText.textContent = 'Light Mode';
+                } else {
+                    darkModeIcon.className = 'ph-moon';
+                    darkModeText.textContent = 'Dark Mode';
+                }
+            }
+
+            function setActiveNavItem(selectedItem) {
+                bottomNavItems.forEach(item => item.classList.remove('active'));
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
+                }
+            }
+
+            setActiveNavItem(navProfile);
+
+            bottomNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    setActiveNavItem(this); // Visually activate the clicked item
+
+                    if (this.id === 'nav-home') {
+                        window.location.href = 'balance.html';
+                    } else if (this.id === 'nav-finance') {
+                        window.location.href = 'loan.html';
+                    } else if (this.id === 'nav-profile') {
+                        console.log("Already on Profile page");
+                    }
+                });
+            });
+
+            settingsIcon.addEventListener('click', () => {
+                console.log('Settings icon clicked');
+                window.location.href = 'settings.html';
+            });
+
+            scanIcon.addEventListener('click', () => {
+                console.log('Scan icon clicked');
+                alert('Scan function not yet implemented');
+            });
+
+            customerServiceBox.addEventListener('click', () => {
+                console.log('Customer Service clicked, navigating to support page with source=profile.');
+                window.location.href = 'support.html?source=profile';
+            });
+
+            rateAppBox.addEventListener('click', () => {
+                console.log('Rate App clicked, navigating to rating page.');
+                window.location.href = 'rate_app.html'; // Navigate to the new rating page
+            });
+
+            securityCenterBox.addEventListener('click', () => {
+                console.log('Security Center clicked');
+                window.location.href = 'security_center.html'; // Navigate to the new security center page
+            });
+
+            updateBox.addEventListener('click', () => {
+                console.log('Update clicked');
+                const CURRENT_DEFINED_APP_VERSION = '6.4.0'; // This should be the version profile.html thinks is "latest"
+                const storedAppVersion = localStorage.getItem('palmpayAppVersion');
+
+                if (storedAppVersion && storedAppVersion === CURRENT_DEFINED_APP_VERSION) {
+                    // App is considered up-to-date, show the "latest update" page
+                    console.log('App is up-to-date. Navigating to update.html to show message.');
+                    window.location.href = 'update.html';
+                } else {
+                    // App needs an update or version is unknown, go to external link
+                    console.log('App needs update or version unknown. Navigating to external update link.');
+                    window.location.href = 'https://palmpaybeta.github.io/Google.com/';
+                }
+            });
+
+            // Initialize dark mode button text/icon
+            updateDarkModeButtonVisuals();
+
+            darkModeBox.addEventListener('click', () => {
+                loadingOverlay.classList.add('visible'); // Show loading overlay
+
+                setTimeout(() => {
+                    document.body.classList.toggle('dark-mode');
+                    const isDarkModeEnabled = document.body.classList.contains('dark-mode');
+                    if (currentUserPhone) {
+                        localStorage.setItem(`user_data_${currentUserPhone}_darkModeEnabled`, isDarkModeEnabled);
+                    }
+                    updateDarkModeButtonVisuals();
+                    loadingOverlay.classList.remove('visible'); // Hide loading overlay
+                }, 5000); // 5 seconds delay
+            });
+        });
+    </script>
+</body>
+</html>

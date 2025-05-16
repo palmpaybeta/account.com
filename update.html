@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        body.dark-mode {
+            background-color: #333;
+        }
+
+        .update-container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Rolling dot animation styles */
+        #rollingAnimation {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .dot {
+            width: 15px;
+            height: 15px;
+            background-color: #AE00FF;
+            border-radius: 50%;
+            position: absolute;
+            animation: rolling 2s linear infinite;
+        }
+
+        @keyframes rolling {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(35px); }
+            50% { transform: translateX(35px); }
+            75% { transform: translateX(0); }
+            100% { transform: translateX(0); }
+        }
+
+        #updateMessage {
+            font-size: 1.2em;
+            color: #555;
+            margin-top: 30px;
+            display: none; /* Initially hidden */
+        }
+
+        body.dark-mode #updateMessage {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="update-container">
+        <div id="rollingAnimation">
+            <div class="dot"></div>
+        </div>
+        <p id="updateMessage">This is the latest update</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rollingAnimation = document.getElementById('rollingAnimation');
+            const updateMessage = document.getElementById('updateMessage');
+
+            // Wait for 5 seconds
+            setTimeout(() => {
+                rollingAnimation.style.display = 'none'; // Hide the animation
+                updateMessage.style.display = 'block'; // Show the message
+
+                 // Optionally, redirect back to profile after a few more seconds
+                 setTimeout(() => {
+                     window.location.href = 'profile.html';
+                 }, 2000); // Redirect after 2 seconds
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

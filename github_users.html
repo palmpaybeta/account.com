@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Users</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 60px; 
+            box-sizing: border-box;
+        }
+
+        .github-users-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 20px;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             left: 0;
+             z-index: 10;
+             border-bottom: 1px solid #eee;
+             justify-content: space-between;
+        }
+
+        .github-users-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+             margin-right: auto;
+        }
+
+        .github-users-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+             margin: 0 auto;
+             padding-right: 30px; /* Space for the back link */
+        }
+
+        .users-list-container {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .github-user-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .github-user-item:hover {
+             background-color: #f9f9f9;
+        }
+
+        .user-details-wrapper {
+             flex-grow: 1;
+             min-width: 0;
+        }
+
+        .user-name-display {
+            font-size: 1em;
+            color: black;
+            font-weight: bold;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-phone-number {
+            font-size: 0.8em;
+            color: #555;
+        }
+
+        .no-users-message {
+            font-size: 1.1em;
+            color: #777;
+            margin-top: 30px;
+            text-align: center;
+        }
+         .user-initial-circle {
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             background-color: #AE00FF; /* Theme color */
+             color: white;
+             font-size: 1.5em;
+             font-weight: bold;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             margin-right: 15px;
+             flex-shrink: 0; /* Prevent shrinking */
+             background-size: cover; 
+             background-position: center; 
+             background-repeat: no-repeat; 
+             overflow: hidden; 
+         }
+         .user-initial-circle span {
+             display: block;
+             width: 100%;
+             height: 100%;
+             text-align: center;
+             line-height: 40px; 
+             color: white; 
+         }
+
+         .user-initial-circle.has-picture span {
+             color: transparent; 
+         }
+
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="github-users-header">
+        <a href="balance.html" class="back-link">&larr;</a>
+        <h1 class="header-title">GitHub Users</h1>
+         <div style="width: 1.5em; margin-left: auto;"></div> <!-- Placeholder for centering -->
+    </div>
+
+    <div id="users-list-container" class="users-list-container">
+        <!-- User items will be populated here -->
+         <p id="no-users-message" class="no-users-message hidden">No GitHub users found yet.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usersListContainer = document.getElementById('users-list-container');
+            const noUsersMessage = document.getElementById('no-users-message');
+
+            const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+
+            if (adminAddedUsers.length === 0) {
+                 noUsersMessage.classList.remove('hidden');
+                 usersListContainer.appendChild(noUsersMessage); // Ensure it's in the container
+            } else {
+                noUsersMessage.classList.add('hidden');
+                adminAddedUsers.forEach(user => {
+                    const userItem = document.createElement('div');
+                    userItem.classList.add('github-user-item');
+                    userItem.dataset.phone = user.phone;
+
+                     const userSpecificFullName = localStorage.getItem(`user_data_${user.phone}_userFullName`);
+                     const userSpecificFirstName = localStorage.getItem(`user_data_${user.phone}_userFirstName`);
+                     const userName = userSpecificFullName || userSpecificFirstName || "NEW USER";
+
+                     const userPictureUrl = localStorage.getItem(`user_data_${user.phone}_profilePictureDataUrl`);
+
+                     const userCircle = document.createElement('div');
+                     userCircle.classList.add('user-initial-circle');
+                     const userInitialSpan = document.createElement('span');
+                     userInitialSpan.textContent = userName.charAt(0).toUpperCase();
+                     userCircle.appendChild(userInitialSpan);
+
+                     if (userPictureUrl) {
+                         userCircle.style.backgroundImage = `url(${userPictureUrl})`;
+                         userCircle.classList.add('has-picture');
+                         userInitialSpan.style.color = 'transparent';
+                     } else {
+                         userCircle.style.backgroundImage = '';
+                         userCircle.classList.remove('has-picture');
+                         userInitialSpan.style.color = 'white';
+                     }
+
+                     userItem.appendChild(userCircle);
+
+
+                    const detailsWrapper = document.createElement('div');
+                    detailsWrapper.classList.add('user-details-wrapper');
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.classList.add('user-name-display');
+                    nameDiv.textContent = userName;
+                    detailsWrapper.appendChild(nameDiv);
+
+                    const phoneDiv = document.createElement('div');
+                    phoneDiv.classList.add('user-phone-number');
+                    phoneDiv.textContent = user.phone; // Display the full phone number
+                    detailsWrapper.appendChild(phoneDiv);
+
+                    userItem.appendChild(detailsWrapper);
+                    usersListContainer.appendChild(userItem);
+
+                    userItem.addEventListener('click', function() {
+                        const recipientPhone = this.dataset.phone;
+                        // Navigate to transfer amount page with recipient details pre-set
+                         localStorage.setItem('transferRecipientName', userName); // Use the displayed name
+                         localStorage.setItem('transferAccountNumber', recipientPhone); // Use the phone number as account
+                         localStorage.setItem('transferBankName', 'Palmpay'); // Hardcode Palmpay
+
+                        window.location.href = 'transfer_amount.html';
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

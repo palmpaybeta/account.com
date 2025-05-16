@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Ensure padding at the bottom to prevent coffee link overlap */
+             padding-bottom: 80px;
+        }
+        .settings-container {
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+        .name-display-box {
+            background-color: #e6f0ff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            cursor: pointer;
+            color: #888;
+            font-size: 1.1em;
+            border: 1px solid #cce0ff;
+        }
+        .name-display-box:hover {
+            background-color: #d9eaff;
+        }
+        .settings-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 0;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             z-index: 10;
+         }
+        .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+         .profile-option-box {
+             background-color: #fff;
+             border-radius: 8px;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+             margin: 15px 0 0 0; /* Adjust margin top only */
+             padding: 15px 20px;
+             width: 100%; /* Take full width within container */
+             box-sizing: border-box;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             cursor: pointer;
+         }
+
+        .profile-option-box:hover {
+            background-color: #f9f9f9;
+        }
+
+        .profile-option-content {
+            display: flex;
+            align-items: center;
+            color: #333;
+            font-size: 1em;
+        }
+
+         .profile-option-content i {
+             font-size: 1.5em;
+             color: #AE00FF;
+             margin-right: 10px;
+             line-height: 1; /* Align icon vertically */
+         }
+
+
+        /* New styles for the coffee link */
+        #coffee-link {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            color: #AE00FF; /* Use the theme color */
+            text-decoration: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            z-index: 100;
+            background-color: #f0f0f0; /* Match body background */
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        #coffee-link i {
+            font-size: 1.5em; /* Adjust icon size */
+            margin-right: 5px; /* Space between icon and text */
+            line-height: 1; /* Vertically align phosphor icon */
+        }
+
+        #coffee-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="settings-container">
+        <div class="settings-header">
+            <a href="profile.html" class="back-link">&larr;</a>
+            <h1 class="header-title">Settings</h1>
+        </div>
+        <div id="name-display-box" class="name-display-box">
+            <span id="settings-greeting">Hi, ...</span>
+        </div>
+
+        <!-- New Change PIN Box -->
+         <div id="change-pin-box" class="profile-option-box">
+             <div class="profile-option-content">
+                 <i class="ph-key"></i>
+                 <span>Change PIN</span>
+             </div>
+             <i class="ph-caret-right" style="font-size: 1.5em; color: #ccc;"></i>
+         </div>
+
+        <!-- More settings options can be added here -->
+    </div>
+
+    <!-- New Coffee Link -->
+    <div id="coffee-link">
+        <i class="ph-coffee"></i>
+        <span>want some coffee?</span>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nameDisplayBox = document.getElementById('name-display-box');
+            const settingsGreeting = document.getElementById('settings-greeting');
+            const coffeeLink = document.getElementById('coffee-link'); // Get the new coffee link element
+            const changePinBox = document.getElementById('change-pin-box'); // Get the new Change PIN box
+
+
+            const phoneNumber = localStorage.getItem('userPhone') || "N/A";
+            const userFirstName = localStorage.getItem('userFirstName');
+
+            if (userFirstName) {
+                settingsGreeting.textContent = `Hi, ${userFirstName}`;
+            } else {
+                settingsGreeting.textContent = `Hi, ${phoneNumber}`;
+            }
+
+            nameDisplayBox.addEventListener('click', function() {
+                window.location.href = 'edit_name.html';
+            });
+
+            // Add event listener to the new coffee link
+            coffeeLink.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior if it were an <a>
+                console.log("Coffee link clicked. Redirecting to login page.");
+                // No need to remove user data based on previous prompts, just navigate.
+                window.location.href = 'index.html';
+            });
+
+             // Add event listener to the new Change PIN box
+            changePinBox.addEventListener('click', function() {
+                 console.log("Change PIN clicked. Redirecting to change_pin page.");
+                 window.location.href = 'change_pin.html'; // Navigate to the new change_pin page
+            });
+        });
+    </script>
+</body>
+</html>

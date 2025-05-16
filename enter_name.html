@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Your Name</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        .input-container {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: none; 
+            border-bottom: 1px solid #ccc; 
+            border-radius: 0; 
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            outline: none; 
+            text-align: center; 
+        }
+
+        button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 20px;
+            position: fixed;
+            bottom: 20px;
+        }
+        .done-button {
+            bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1 {
+            font-size: 1.2em; 
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <a href="add_money.html" style="position: absolute; top: 10px; left: 10px; font-size: 1.5em; color: #000; text-decoration: none;">&larr;</a>
+    <h1>Enter your Palmpay Full Name here</h1>
+    <div class="input-container">
+        <input type="text" id="fullName" placeholder="Full Name">
+        <button id="doneButton" class="done-button hidden">Done</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fullNameInput = document.getElementById('fullName');
+            const doneButton = document.getElementById('doneButton');
+
+            fullNameInput.addEventListener('input', function() {
+                if (fullNameInput.value.trim() !== '') {
+                    doneButton.classList.remove('hidden');
+                } else {
+                    doneButton.classList.add('hidden');
+                }
+            });
+
+            doneButton.addEventListener('click', function() {
+                const fullName = fullNameInput.value;
+                localStorage.setItem('fullName', fullName);
+                window.location.href = 'deposit.html';
+            });
+        });
+    </script>
+</body>
+</html>

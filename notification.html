@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            text-align: center;
+            padding-bottom: 20px; /* Add some padding at the bottom */
+            box-sizing: border-box;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background-color: #f0f0f0; /* Match body background */
+            width: 100%;
+            box-sizing: border-box;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .notification-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 auto; /* Center the title */
+        }
+
+        .notification-header .settings-icon {
+            font-size: 1.5em;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .tab-bar {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #777;
+            font-size: 0.9em;
+            text-align: center;
+            width: 50%;
+            padding-top: 10px;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .tab-item i {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .tab-item.active {
+            color: #AE00FF;
+        }
+
+        .tab-item.active i {
+             color: #AE00FF;
+        }
+
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -11px; /* Position below the text and padding */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background-color: #AE00FF;
+        }
+
+        .content-section {
+            width: 100%;
+            max-width: 600px;
+            padding: 0 15px;
+            box-sizing: border-box;
+            display: none; /* Hidden by default */
+            flex-direction: column; /* Use flex for content */
+            align-items: center;
+        }
+
+        .content-section.active {
+            display: flex; /* Show when active */
+        }
+
+        .payment-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .box-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            position: relative; /* Needed for absolute positioning of tiny-success */
+        }
+
+        .transfer-status {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #333;
+            text-align: left; /* Align 'Transfer Successful' to the left */
+            flex-grow: 1; /* Allow it to take space */
+        }
+
+        .tiny-success {
+            font-size: 0.7em;
+            color: green;
+            font-weight: bold;
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%); /* Center it vertically and horizontally */
+             white-space: nowrap; /* Prevent wrapping */
+         }
+
+
+        .box-amount {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            width: 100%; /* Ensure it takes full width to center text */
+            cursor: pointer; /* Indicate it's clickable/interactive */
+        }
+
+        .box-recipient {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .recipient-label {
+             font-weight: bold;
+        }
+
+        .recipient-name {
+             font-weight: normal;
+             text-align: right;
+             flex-grow: 1; /* Allow name to take space */
+             margin-left: 10px; /* Add some space */
+             overflow: hidden;
+             text-overflow: ellipsis;
+             white-space: nowrap;
+        }
+
+        .box-footer {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: #777;
+        }
+
+        .transaction-datetime {
+             text-align: left;
+        }
+
+        /* New styles for the view details box */
+        .view-details-box {
+             border: 1px solid #ccc; /* Add border */
+             border-radius: 15px; /* Make it rounded */
+             padding: 3px 10px; /* Add some padding */
+             display: inline-flex; /* Use inline-flex to wrap content and center */
+             align-items: center;
+             justify-content: center;
+             font-size: 0.9em; /* Slightly larger font */
+             color: white; /* Change text color to white for contrast */
+             background-color: #6800FF; /* Changed background color */
+             border-color: #6800FF; /* Match border color */
+             /* Make non-clickable */
+             pointer-events: none;
+             opacity: 0.8; /* Indicate it's not active */
+        }
+
+        .view-incoming-button {
+            background-color: #6800FF;
+            color: white;
+            border: none;
+            padding: 3px 10px;
+            font-size: 0.9em;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        .no-content-message {
+            font-size: 1.2em;
+            color: #777;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="notification-header notification_page_header"> 
+        <a href="balance.html" class="back-link">&larr;</a>
+        <h1 class="header-title">Notification</h1>
+        <i id="settings-icon" class="ph-gear settings-icon"></i>
+    </div>
+
+    <div class="tab-bar">
+        <div id="payments-tab" class="tab-item active">
+            <i class="ph-wallet"></i>
+            <span>Payments</span>
+        </div>
+        <div id="messages-tab" class="tab-item">
+            <i class="ph-chat-circle"></i>
+            <span>Messages</span>
+        </div>
+    </div>
+
+    <div id="payments-content" class="content-section active">
+        <!-- Payment boxes will be added here by JavaScript -->
+         <p id="no-payments-message" class="no-content-message hidden">No payment notifications yet.</p>
+    </div>
+
+    <div id="messages-content" class="content-section">
+        <!-- Message content will be added here -->
+         <p id="no-messages-message" class="no-content-message">No message notifications yet.</p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentsTab = document.getElementById('payments-tab');
+            const messagesTab = document.getElementById('messages-tab');
+            const paymentsContent = document.getElementById('payments-content');
+            const messagesContent = document.getElementById('messages-content');
+            const settingsIcon = document.getElementById('settings-icon');
+            const noPaymentsMessage = document.getElementById('no-payments-message');
+            const noMessagesMessage = document.getElementById('no-messages-message');
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            // Ensure showAppNotification is available
+            const showAppNotification = window.showAppNotification;
+
+            function showTab(tabId) {
+                paymentsTab.classList.remove('active');
+                messagesTab.classList.remove('active');
+                paymentsContent.classList.remove('active');
+                messagesContent.classList.remove('active');
+
+                if (tabId === 'payments') {
+                    paymentsTab.classList.add('active');
+                    paymentsContent.classList.add('active');
+                    displayPaymentNotifications();
+                } else if (tabId === 'messages') {
+                    messagesTab.classList.add('active');
+                    messagesContent.classList.add('active');
+                     // No messages to display yet, maybe add a placeholder or fetch later
+                }
+            }
+
+            function formatDate(timestamp) {
+                if (!timestamp) return '';
+                const now = new Date();
+                const transactionDate = new Date(timestamp);
+
+                const diffTime = now.getTime() - transactionDate.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                const timeString = transactionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                if (diffDays === 0 && now.getDate() === transactionDate.getDate()) {
+                    return `Today ${timeString}`;
+                } else if (diffDays === 1 && now.getDate() - 1 === transactionDate.getDate()) {
+                     return `Yesterday ${timeString}`;
+                 } else if (diffDays < 7) { // Within the last week but not today/yesterday
+                    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                    return `${days[transactionDate.getDay()]} ${timeString}`;
+                } else { // Older than a week
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    return `${months[transactionDate.getMonth()]} ${transactionDate.getDate()}, ${timeString}`;
+                }
+            }
+
+            function addNotification(notification) {
+                 const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+                 userSimulatedNotifications.push(notification);
+                 userSimulatedNotifications.sort((a, b) => b.timestamp - a.timestamp);
+                 localStorage.setItem(`user_data_${currentUserPhone}_simulatedNotifications`, JSON.stringify(userSimulatedNotifications));
+            }
+
+            // New function to mark an existing notification as cloned
+            function markNotificationCloned(originalTimestamp, originalType, stateToSet) {
+                const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+                const notificationIndex = userSimulatedNotifications.findIndex(
+                    notif => notif.type === originalType && notif.timestamp === parseInt(originalTimestamp, 10) // Ensure timestamp is number
+                );
+
+                if (notificationIndex !== -1) {
+                    userSimulatedNotifications[notificationIndex].clonedState = stateToSet; // Mark original as cloned
+                    localStorage.setItem(`user_data_${currentUserPhone}_simulatedNotifications`, JSON.stringify(userSimulatedNotifications));
+                    console.log(`Marked original notification (type: ${originalType}, timestamp: ${originalTimestamp}) as cloned: ${stateToSet}`);
+                } else {
+                    console.error(`Could not find original notification (type: ${originalType}, timestamp: ${originalTimestamp}) to mark as cloned.`);
+                }
+            }
+
+            function displayPaymentNotifications() {
+                const userSimulatedNotifications = JSON.parse(localStorage.getItem(`user_data_${currentUserPhone}_simulatedNotifications`) || '[]');
+                paymentsContent.innerHTML = ''; // Clear existing content
+
+                // Filter for relevant transaction types and sort newest first
+                const paymentNotifications = userSimulatedNotifications.filter(notif =>
+                    ['completed', 'failed', 'reversed', 'pending_deposit', 'incoming_transfer'].includes(notif.type) &&
+                    (notif.type !== 'incoming_transfer' || notif.recipientPhone === currentUserPhone) // Filter incoming for current user
+                ).sort((a, b) => b.timestamp - a.timestamp);
+
+                if (paymentNotifications.length === 0) {
+                    noPaymentsMessage.classList.remove('hidden');
+                    paymentsContent.appendChild(noPaymentsMessage);
+                } else {
+                    noPaymentsMessage.classList.add('hidden');
+
+                    paymentNotifications.forEach(notif => {
+                        let formattedAmount = 'N/A';
+                        let statusText = '';
+                        let tinyStatusText = '';
+                        let amountColor = '#333'; // Default black
+                        let recipientName = notif.data.recipient || notif.data.fullName || 'Unknown';
+                        const formattedDateTime = formatDate(notif.timestamp);
+
+                        if (notif.data.amount) {
+                           formattedAmount = parseFloat(notif.data.amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        } else if (notif.data.selectedAmount) { // For pending deposit
+                           formattedAmount = parseFloat(notif.data.selectedAmount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+
+                        let viewButtonHtml = `<div class="view-details-box">View &gt;</div>`; // Default non-clickable
+
+                        if (notif.type === 'completed') {
+                            statusText = 'Transfer Successful';
+                            tinyStatusText = 'Success';
+                            amountColor = '#333';
+                            formattedAmount = `₦${formattedAmount}`;
+                        } else if (notif.type === 'failed') {
+                            statusText = 'Transaction Failed';
+                            tinyStatusText = 'Failed';
+                            amountColor = '#777777';
+                            formattedAmount = `₦${formattedAmount}`;
+                        } else if (notif.type === 'reversed') {
+                            statusText = 'Transaction Reversed';
+                            tinyStatusText = 'Reversed';
+                            amountColor = '#333';
+                            formattedAmount = `+₦${formattedAmount}`;
+                        } else if (notif.type === 'pending_deposit') {
+                             statusText = 'Deposit Pending';
+                             tinyStatusText = 'Pending';
+                             amountColor = '#AE00FF';
+                             formattedAmount = `+₦${formattedAmount}`;
+                             recipientName = notif.data.fullName || 'Your Account';
+                        } else if (notif.type === 'incoming_transfer') {
+                            statusText = 'Interbank Transfer';
+                            tinyStatusText = 'Received';
+                            amountColor = 'green';
+                            formattedAmount = `+₦${formattedAmount}`;
+                            recipientName = notif.data.senderName || 'Unknown Sender'; // Display sender as "recipient" here
+                            // Make the view button functional for incoming transfers
+                            viewButtonHtml = `<button class="view-incoming-button" data-timestamp="${notif.timestamp}" data-sender="${encodeURIComponent(notif.data.senderName || '')}" data-amount="${notif.data.amount}">View</button>`;
+                        }
+
+                        const paymentBox = document.createElement('div');
+                        paymentBox.classList.add('payment-box');
+                        // Store notification data on the element for easy access
+                        paymentBox.dataset.notificationType = notif.type;
+                        paymentBox.dataset.notificationTimestamp = notif.timestamp;
+                        paymentBox.dataset.amount = notif.data.amount || notif.data.selectedAmount || '0';
+                        paymentBox.dataset.recipient = recipientName;
+                         if (notif.data.account) paymentBox.dataset.account = notif.data.account;
+                         if (notif.data.bank) paymentBox.dataset.bank = notif.data.bank;
+                         if (notif.data.fullName) paymentBox.dataset.fullName = notif.data.fullName;
+                         if (notif.data.userPhone) paymentBox.dataset.userPhone = notif.data.userPhone;
+                         if (notif.data.description) paymentBox.dataset.description = notif.data.description;
+                         // Add clonedState to dataset if it exists
+                         if (notif.clonedState) paymentBox.dataset.clonedState = notif.clonedState;
+
+                        // Build the HTML structure
+                         let recipientHtml = `
+                            <div class="box-recipient">
+                                <span class="recipient-label">${notif.type === 'pending_deposit' ? 'From:' : (notif.type === 'incoming_transfer' ? 'Transfer from:' : 'Recipient:')}</span>
+                                <span class="recipient-name">${recipientName}</span>
+                            </div>
+                         `;
+
+                         if (notif.type === 'reversed') {
+                             recipientHtml = '';
+                         }
+
+                        paymentBox.innerHTML = `
+                            <div class="box-header">
+                                <span class="transfer-status">${statusText}</span>
+                                <span class="tiny-success" style="color: ${notif.type === 'failed' ? 'black' : (notif.type === 'completed' ? 'green' : (notif.type === 'incoming_transfer' ? 'green' : '#777'))};">${tinyStatusText}</span>
+                            </div>
+                            <div class="box-amount" style="color: ${amountColor};">${formattedAmount}</div>
+                            ${recipientHtml}
+                            <div class="box-footer">
+                                <span class="transaction-datetime">${formattedDateTime}</span>
+                                ${viewButtonHtml}
+                            </div>
+                        `;
+
+                        paymentsContent.appendChild(paymentBox);
+
+                        // Add event listener for the "View" button if it's the functional one
+                        const viewIncomingButton = paymentBox.querySelector('.view-incoming-button');
+                        if (viewIncomingButton) {
+                            viewIncomingButton.addEventListener('click', function() {
+                                const ts = this.dataset.timestamp;
+                                const sender = this.dataset.sender;
+                                const amt = this.dataset.amount;
+                                window.location.href = `view_incoming_receipt.html?timestamp=${ts}&sender=${sender}&amount=${amt}`;
+                            });
+                        }
+                    });
+                }
+            }
+
+            paymentsTab.addEventListener('click', () => showTab('payments'));
+            messagesTab.addEventListener('click', () => showTab('messages'));
+
+            settingsIcon.addEventListener('click', () => {
+                window.location.href = 'settings.html';
+            });
+
+             // Event listener for triple-click on amount for Failed clone
+            paymentsContent.addEventListener('mousedown', function(event) {
+                 // Check if the clicked element is the amount span within a 'completed' box
+                 const targetAmount = event.target.closest('.box-amount');
+                 if (targetAmount) {
+                     const originalBox = targetAmount.closest('.payment-box');
+
+                     // --- Add check here to prevent cloning from Failed or Reversed boxes ---
+                      if (originalBox && (originalBox.dataset.notificationType === 'failed' || originalBox.dataset.notificationType === 'reversed')) {
+                          console.log('Ignoring click on Failed or Reversed transaction amount.');
+                          return;
+                      }
+                      // --- End check ---
+
+                      if (originalBox && originalBox.dataset.notificationType === 'completed') {
+                          // Check if this completed transaction was already cloned to failed
+                          if (originalBox.dataset.clonedState === 'failed') {
+                              console.log('Ignoring triple-click: This completed transaction was already cloned to Failed.');
+                              return;
+                          }
+
+                          // event.detail === 3 for a triple click
+                          if (event.detail === 3) {
+                             event.preventDefault(); // Prevent default text selection
+
+                             const originalTimestamp = originalBox.dataset.notificationTimestamp;
+                             // No need to find the original notification here, markNotificationCloned will do it
+
+                             // Wait for 5 seconds
+                                  setTimeout(() => {
+                                     console.log('Triple-click detected on amount. Cloning and marking as Failed...');
+
+                                      const failedNotification = {
+                                          type: 'failed',
+                                          timestamp: Date.now(), // New timestamp for the new notification entry
+                                          data: { // Copy data from original box dataset (safe source)
+                                              amount: originalBox.dataset.amount,
+                                              recipient: originalBox.dataset.recipient,
+                                              account: originalBox.dataset.account,
+                                              bank: originalBox.dataset.bank,
+                                              fullName: originalBox.dataset.fullName,
+                                              userPhone: originalBox.dataset.userPhone,
+                                              description: originalBox.dataset.description
+                                           }
+                                      };
+
+                                      // Mark the *original* completed notification as cloned to prevent re-cloning
+                                      markNotificationCloned(originalTimestamp, 'completed', 'failed');
+
+                                      addNotification(failedNotification); // Add to storage
+                                      // Trigger system notification for failed transaction
+                                      if (showAppNotification) {
+                                           const failedAmountStr = `-₦${parseFloat(failedNotification.data.amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                           showAppNotification(
+                                               "Transaction Failed",
+                                               failedAmountStr,
+                                               failedNotification.timestamp,
+                                               currentUserPhone // For current user
+                                           );
+                                      }
+                                      displayPaymentNotifications(); // Re-render list
+                                      console.log('Failed clone created and system notification shown.');
+
+                                  }, 5000); // 5000 milliseconds = 5 seconds
+                          }
+                      }
+                 }
+             });
+
+             // Event listener for double-click on amount for Reversed clone
+             paymentsContent.addEventListener('dblclick', function(event) {
+                 const targetAmount = event.target.closest('.box-amount');
+                 if (targetAmount) {
+                     const failedBox = targetAmount.closest('.payment-box');
+                      // This handler is specific to 'failed' boxes
+                      if (failedBox && failedBox.dataset.notificationType === 'failed') {
+
+                           // Check if this failed transaction was already cloned to reversed
+                          if (failedBox.dataset.clonedState === 'reversed') {
+                              console.log('Ignoring double-click: This failed transaction was already cloned to Reversed.');
+                              return;
+                          }
+
+                          // Double-click detected on amount in a 'failed' box
+                          console.log('Double-click detected on failed amount. According to latest instructions, no Reversed clone is created.');
+                          // Do nothing, or provide user feedback that the action is not supported
+                          // alert("This action is not supported in this version."); // Optional user feedback
+
+                      }
+                 }
+             });
+
+            // Initialize the page by showing the payments tab and displaying notifications
+            showTab('payments');
+             // Add placeholder for no messages message if messages tab is clicked
+            messagesContent.appendChild(noMessagesMessage);
+
+        });
+    </script>
+</body>
+</html>

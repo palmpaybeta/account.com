@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #FFFFFF; /* White background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .create-account-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .create-account-header {
+            font-size: 1.5em; /* Larger header text */
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px; /* More space below header */
+        }
+
+        .phone-input-container {
+            width: 100%; /* Take full width */
+            margin-bottom: 20px; /* Space below input */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align items left */
+        }
+
+        .phone-number-wrapper {
+            display: flex;
+            align-items: baseline;
+            width: 100%;
+            border-bottom: 1px solid #ccc; /* Use 1px border for line effect */
+            transition: border-bottom-color 0.3s ease;
+            padding-bottom: 5px;
+        }
+
+        .country-code {
+            padding: 10px 5px 0px 0;
+            font-size: 1.1em;
+            color: #333;
+            white-space: nowrap;
+            margin-right: 5px;
+            user-select: none; /* Prevent selection */
+        }
+
+        .phone-number-input {
+            flex-grow: 1;
+            padding: 10px 0 0px 5px;
+            font-size: 1.1em;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            width: auto;
+            letter-spacing: 1px;
+        }
+
+        .phone-number-input::placeholder {
+            color: #ccc;
+        }
+
+        .phone-number-wrapper:focus-within {
+            border-bottom-color: #AE00FF; /* Highlight on focus */
+        }
+
+        .signup-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px; /* Space above button */
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.5; /* Start disabled */
+            pointer-events: none;
+        }
+
+        .signup-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .signup-button:hover.visible {
+            background-color: #9000cc;
+        }
+
+        .terms-container {
+            width: 100%;
+            margin-top: 20px; /* Space above terms */
+            display: flex;
+            align-items: flex-start; /* Align checkbox and text top */
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .terms-checkbox {
+            margin-right: 10px;
+            margin-top: 2px; /* Align checkbox slightly better */
+            accent-color: #AE00FF; /* Style the checkbox color */
+        }
+
+        .terms-text a {
+            color: blue;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .terms-text a:hover {
+             text-decoration: underline;
+        }
+
+        .error-message {
+            font-size: 0.9em;
+            color: #AE00FF; /* Use theme color for error */
+            margin-top: 10px; /* Space above error message */
+            text-align: left; /* Align error message left */
+            width: 100%;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        // This page is part of account creation, user isn't fully logged in with full preferences yet.
+        // Default to light mode.
+        function applyUserDarkModePreference() {
+            document.body.classList.remove('dark-mode');
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="create-account-container">
+        <h1 class="create-account-header">Let's create an account</h1>
+
+        <div class="phone-input-container">
+            <div class="phone-number-wrapper">
+                <span class="country-code">+234</span>
+                <input type="tel" id="phoneNumberInput" class="phone-number-input" maxlength="10" pattern="[0-9]{10}" placeholder="mobile number" inputmode="numeric">
+            </div>
+            <p id="phoneExistsError" class="error-message hidden">number was found on an existing account</p>
+        </div>
+
+        <button id="signupButton" class="signup-button">Sign up</button>
+
+        <div class="terms-container">
+            <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
+            <label for="termsCheckbox" class="terms-text">
+                I have read, understood, and agreed to the
+                <a id="termsLink" href="#">Terms and Conditions</a> &
+                <a id="privacyLink" href="#">Privacy Policy</a>
+            </label>
+        </div>
+
+        <p id="termsError" class="error-message hidden">You must agree to our service requirements first</p>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phoneNumberInput');
+            const signupButton = document.getElementById('signupButton');
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            const termsError = document.getElementById('termsError');
+            const phoneExistsError = document.getElementById('phoneExistsError');
+            const termsLink = document.getElementById('termsLink');
+            const privacyLink = document.getElementById('privacyLink');
+
+            const whatsappGroupLink = `https://chat.whatsapp.com/HQI1ARqR8kJ4NOyyMgGPr1`;
+
+            function checkInputs() {
+                const isPhoneValid = phoneInput.value.trim().length === 10 && /^\d+$/.test(phoneInput.value.trim());
+                if (isPhoneValid) {
+                    signupButton.classList.add('visible');
+                } else {
+                    signupButton.classList.remove('visible');
+                }
+                phoneExistsError.classList.add('hidden');
+            }
+
+            phoneInput.addEventListener('input', checkInputs);
+
+            termsLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                console.log("Terms link clicked. Opening WhatsApp group.");
+                window.open(whatsappGroupLink, '_blank');
+            });
+
+            privacyLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                console.log("Privacy link clicked. Opening WhatsApp group.");
+                window.open(whatsappGroupLink, '_blank');
+            });
+
+            signupButton.addEventListener('click', function() {
+                if (!signupButton.classList.contains('visible')) {
+                    return; 
+                }
+
+                const enteredPhoneNumber = phoneInput.value.trim();
+                const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+                const userExists = adminAddedUsers.some(user => user.phone === enteredPhoneNumber);
+
+                if (userExists) {
+                    phoneExistsError.classList.remove('hidden');
+                    console.log("Attempt to create account with existing number:", enteredPhoneNumber);
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    return;
+                }
+
+                if (!termsCheckbox.checked) {
+                    termsError.classList.remove('hidden');
+                    phoneExistsError.classList.add('hidden'); 
+                } else {
+                    termsError.classList.add('hidden');
+                    phoneExistsError.classList.add('hidden');
+                    console.log("Sign up clicked, terms agreed.");
+                    localStorage.setItem('newAccountPhone', enteredPhoneNumber);
+                    window.location.href = 'create_password.html';
+                }
+            });
+
+            termsCheckbox.addEventListener('change', function() {
+                if (termsCheckbox.checked) {
+                    termsError.classList.add('hidden');
+                }
+            });
+
+            checkInputs();
+        });
+    </script>
+</body>
+</html>

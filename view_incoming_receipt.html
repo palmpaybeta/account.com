@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incoming Transfer Receipt</title>
+    <link rel="stylesheet" href="style.css"> 
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            min-height: 100vh;
+            color: #333;
+            position: relative; 
+            padding-top: 80px; 
+            box-sizing: border-box;
+        }
+
+        .close-receipt-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em; 
+            color: #555;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .receipt-content-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .success-circle { 
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #44CD74; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .success-circle i {
+            font-size: 3em;
+            color: white;
+            line-height: 1;
+        }
+
+        .receipt-header-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .received-amount {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .receipt-details {
+            font-size: 1em;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            text-align: left; 
+            width: 100%;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .receipt-details p {
+            margin: 5px 0;
+        }
+        .receipt-details strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <i id="close-receipt" class="ph-x close-receipt-icon"></i>
+
+    <div class="receipt-content-block">
+        <div class="success-circle">
+            <i class="ph-check-bold"></i> 
+        </div>
+
+        <div class="receipt-header-text">Transfer Received</div>
+
+        <div id="receivedAmountDisplay" class="received-amount">₦0.00</div>
+
+        <div class="receipt-details">
+            <p><strong>From:</strong> <span id="senderNameDisplay"></span></p>
+            <p><strong>Date:</strong> <span id="transactionDateDisplay"></span></p>
+            <!-- Add more details if needed -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const closeButton = document.getElementById('close-receipt');
+            const receivedAmountDisplay = document.getElementById('receivedAmountDisplay');
+            const senderNameDisplay = document.getElementById('senderNameDisplay');
+            const transactionDateDisplay = document.getElementById('transactionDateDisplay');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const timestamp = urlParams.get('timestamp');
+            const senderName = decodeURIComponent(urlParams.get('sender') || 'Unknown Sender');
+            const amount = urlParams.get('amount');
+
+            if (amount) {
+                const formattedAmount = parseFloat(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                receivedAmountDisplay.textContent = `+₦${formattedAmount}`; 
+            }
+
+            senderNameDisplay.textContent = senderName;
+
+            if (timestamp) {
+                const date = new Date(parseInt(timestamp));
+                const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+                transactionDateDisplay.textContent = date.toLocaleDateString('en-US', options);
+            } else {
+                transactionDateDisplay.textContent = 'N/A';
+            }
+
+            closeButton.addEventListener('click', function() {
+                history.back();
+            });
+        });
+    </script>
+</body>
+</html>

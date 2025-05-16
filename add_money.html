@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Money</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Add html2canvas library for capturing the box -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .add-money-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 0;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             z-index: 10;
+             margin-bottom: 30px;
+             justify-content: center;
+         }
+
+        .add-money-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+            position: absolute;
+            left: 20px;
+        }
+
+        .add-money-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 auto;
+        }
+
+
+        /* Style for the details box at the center */
+        .details-box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 40px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+         .details-box div {
+             margin: 5px 0;
+             color: #333;
+         }
+         .details-box .user-name {
+             font-weight: bold;
+             font-size: 1.1em;
+         }
+         .details-box .user-phone {
+             color: #555;
+             font-size: 1em;
+         }
+         .details-box .bank-name {
+             color: #AE00FF;
+             font-weight: bold;
+             font-size: 1.1em;
+             margin-top: 15px;
+             padding-top: 15px;
+             border-top: 1px dashed #eee;
+             width: 100%;
+         }
+
+        /* New style for the info text below the box */
+        .receive-money-info {
+            font-size: 0.9em;
+            color: #555;
+            text-align: center;
+            margin-top: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+
+        /* Copy button at the bottom */
+        .copy-button { 
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 90%;
+            max-width: 400px;
+            margin-top: auto;
+            margin-bottom: 20px;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .copy-button:hover {
+            background-color: #9000cc;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="add-money-header">
+         <a href="balance.html" class="back-link">&larr;</a>
+         <h1 class="header-title">Fund your account</h1>
+    </div>
+
+    <!-- Details Box Wrapper for Capture -->
+    <div id="accountDetailsBox" class="details-box">
+        <div id="userPhoneNumberDisplay" class="user-phone"></div>
+        <div id="userNameDisplay" class="user-name"></div>
+        <div class="bank-name">Palmpay Beta</div>
+    </div>
+
+    <!-- New Info Text -->
+    <p class="receive-money-info">Receive money from a Palmpay beta User. Share your account details and receive your money</p>
+
+    <!-- Copy Button -->
+    <button id="copyButton" class="copy-button">Copy & Share</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userPhoneNumberDisplay = document.getElementById('userPhoneNumberDisplay');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const copyButton = document.getElementById('copyButton'); 
+            const accountDetailsBox = document.getElementById('accountDetailsBox'); 
+
+            const currentUserPhone = localStorage.getItem('currentUserPhone'); 
+            const userFullName = localStorage.getItem(`user_data_${currentUserPhone}_userFullName`);
+            const userFirstName = localStorage.getItem(`user_data_${currentUserPhone}_userFirstName`);
+
+            // Display user phone number
+            if (currentUserPhone) {
+                userPhoneNumberDisplay.textContent = currentUserPhone;
+            } else {
+                userPhoneNumberDisplay.textContent = 'Phone Number N/A';
+            }
+
+            // Display user name (Full name > First name > Phone Number)
+            let displayedName = userFullName || userFirstName || currentUserPhone || "User";
+            userNameDisplay.textContent = displayedName;
+
+            copyButton.addEventListener('click', function() {
+                console.log('"Copy & Share" clicked. Capturing details box for sharing...');
+
+                // Ensure the capture area has a defined background color for the screenshot
+                accountDetailsBox.style.backgroundColor = '#fff';
+
+                html2canvas(accountDetailsBox, {
+                    logging: false, 
+                    useCORS: true, 
+                    backgroundColor: '#fff' 
+                }).then(function(canvas) {
+                    console.log('Details box captured. Attempting to save and share...');
+
+                    canvas.toBlob(function(blob) {
+                        if (blob) {
+                            const file = new File([blob], "My Account Number.png", { type: "image/png" });
+
+                            // Check if Web Share API is available and supports files
+                            if (navigator.share && navigator.canShare({ files: [file] })) {
+                                navigator.share({
+                                    files: [file],
+                                    title: 'My Palmpay Beta Account Details',
+                                    text: 'Here are my Palmpay Beta account details:',
+                                }).then(() => {
+                                    console.log('Share successful');
+                                }).catch((error) => {
+                                    console.error('Share failed', error);
+                                    alert('Sharing failed or was cancelled. The image is ready to download.');
+                                     // Fallback to download if share fails or cancelled
+                                     triggerDownload(blob);
+                                });
+                            } else {
+                                console.log('Web Share API not available or does not support files. Triggering download.');
+                                // Fallback to download if Web Share API is not available
+                                triggerDownload(blob);
+                                alert('Sharing is not supported in this browser. The image has been downloaded to your device storage.');
+                            }
+
+                             // Restore original background if it was temporarily set
+                             accountDetailsBox.style.backgroundColor = '';
+
+                        } else {
+                            console.error('Failed to create blob from canvas.');
+                            alert('Failed to prepare details for sharing.');
+                             // Restore original background
+                             accountDetailsBox.style.backgroundColor = '';
+                        }
+                    }, 'image/png');
+
+                }).catch(err => {
+                    console.error('Error capturing details box:', err);
+                    alert('Failed to capture account details.');
+                    // Restore original background
+                    accountDetailsBox.style.backgroundColor = '';
+                });
+            });
+
+             // Helper function to trigger file download
+             function triggerDownload(blob) {
+                 const url = URL.createObjectURL(blob);
+                 const link = document.createElement('a');
+                 link.href = url;
+                 link.download = "My Account Number.png";
+                 document.body.appendChild(link);
+                 link.click();
+                 document.body.removeChild(link);
+                 URL.revokeObjectURL(url);
+             }
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Bank Beneficiary</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .beneficiary-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px; 
+        }
+
+        .beneficiary-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 0;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             z-index: 10;
+             margin-bottom: 30px;
+             justify-content: center;
+         }
+
+        .beneficiary-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+            position: absolute;
+            left: 20px;
+        }
+
+        .beneficiary-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 auto;
+        }
+
+        .input-wrapper {
+            width: 100%;
+            margin-bottom: 25px; 
+        }
+
+        .input-wrapper label {
+             display: block;
+             font-size: 0.9em;
+             color: #888;
+             margin-bottom: 5px;
+             text-align: left;
+        }
+
+        .input-wrapper input[type="text"],
+        .input-wrapper .auto-filled {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 1.1em;
+            outline: none;
+            background-color: transparent;
+            box-sizing: border-box;
+            color: #333;
+            text-align: left;
+        }
+
+        .input-wrapper .auto-filled {
+             font-weight: bold;
+             color: #000; 
+             padding-top: 5px;
+             min-height: 1.2em;
+        }
+
+
+        .save-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 30px;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.5;
+            pointer-events: none;
+         }
+
+         .save-button.visible {
+             opacity: 1;
+             pointer-events: auto;
+         }
+
+         .save-button:hover.visible {
+             background-color: #9000cc;
+         }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="beneficiary-header">
+         <a href="transfer_to_bank.html" class="back-link">&larr;</a>
+         <h1 class="header-title">Add Bank Beneficiary</h1>
+    </div>
+
+    <div class="beneficiary-container">
+        <div class="input-wrapper">
+             <label for="bankNameDisplay">Bank Name</label>
+             <div id="bankNameDisplay" class="auto-filled"></div>
+        </div>
+        <div class="input-wrapper">
+             <label for="accountNumberInput">Account Number</label>
+             <input type="text" id="accountNumberInput" placeholder="Enter account number" inputmode="numeric" pattern="\d*" maxlength="10">
+        </div>
+        <div class="input-wrapper">
+            <label for="recipientNameInput">Recipient Name</label>
+            <input type="text" id="recipientNameInput" placeholder="Enter Recipient name">
+        </div>
+
+        <button id="saveButton" class="save-button">Save</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bankNameDisplay = document.getElementById('bankNameDisplay');
+            const accountNumberInput = document.getElementById('accountNumberInput');
+            const recipientNameInput = document.getElementById('recipientNameInput');
+            const saveButton = document.getElementById('saveButton');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const bankName = urlParams.get('bankName');
+            const currentUserPhone = localStorage.getItem('currentUserPhone'); // Get current user's phone
+
+
+            if (bankName) {
+                bankNameDisplay.textContent = bankName;
+            } else {
+                bankNameDisplay.textContent = 'Bank Not Selected';
+            }
+
+            const checkInputs = () => {
+                const isAccountValid = accountNumberInput.value.trim().length === 10 && /^\d+$/.test(accountNumberInput.value.trim());
+                const isNameValid = recipientNameInput.value.trim().length > 0;
+
+                if (bankName && isAccountValid && isNameValid) {
+                    saveButton.classList.add('visible');
+                } else {
+                    saveButton.classList.remove('visible');
+                }
+            };
+
+            accountNumberInput.addEventListener('input', checkInputs);
+            recipientNameInput.addEventListener('input', checkInputs);
+
+            saveButton.addEventListener('click', function() {
+                if (!saveButton.classList.contains('visible')) {
+                    return;
+                }
+
+                const bank = bankNameDisplay.textContent;
+                const account = accountNumberInput.value.trim();
+                const name = recipientNameInput.value.trim();
+
+                if (bank && account && name && currentUserPhone) { // Ensure currentUserPhone exists
+                    const newBeneficiary = { bank, account, name, addedAt: Date.now() };
+
+                    const userSpecificKey = `user_data_${currentUserPhone}_savedBeneficiaries`;
+                    const savedBeneficiaries = JSON.parse(localStorage.getItem(userSpecificKey) || '[]');
+
+                    // Check if beneficiary already exists to avoid duplicates (optional, good practice)
+                    const existingBeneficiary = savedBeneficiaries.find(
+                        b => b.bank === bank && b.account === account
+                    );
+
+                    if (existingBeneficiary) {
+                        // Optionally update the existing one or alert the user
+                        console.log('Beneficiary already exists:', existingBeneficiary);
+                        alert('This beneficiary is already saved.');
+                    } else {
+                        savedBeneficiaries.push(newBeneficiary);
+                        localStorage.setItem(userSpecificKey, JSON.stringify(savedBeneficiaries));
+                        console.log('Beneficiary saved for user', currentUserPhone, ':', newBeneficiary);
+                    }
+
+
+                    window.location.href = 'transfer_to_bank.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

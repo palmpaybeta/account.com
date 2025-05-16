@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New User</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 60px;
+            padding-bottom: 80px;
+            box-sizing: border-box;
+        }
+
+        .add-user-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 20px;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             left: 0;
+             z-index: 10;
+             border-bottom: 1px solid #eee;
+             justify-content: space-between;
+         }
+
+        .add-user-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+             margin-right: auto;
+        }
+
+        .add-user-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+             margin: 0 auto;
+             padding-right: 30px; /* Space for the back link */
+        }
+
+         .input-container {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 400px;
+            display: flex; /* Ensure it's displayed */
+            flex-direction: column;
+            align-items: center;
+         }
+
+         .save-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 90%;
+            max-width: 400px;
+            margin-top: 30px;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.5; /* Start as disabled */
+            pointer-events: none; /* Start as non-clickable */
+         }
+
+        .hidden {
+            display: none;
+        }
+
+         .input-wrapper {
+             width: 100%;
+             margin-bottom: 20px;
+         }
+         .input-wrapper label {
+             display: block;
+             font-size: 0.9em;
+             color: #888;
+             margin-bottom: 5px;
+             text-align: left;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 1.1em;
+            outline: none;
+            background-color: transparent;
+            box-sizing: border-box;
+            color: #333;
+            text-align: left;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #ccc;
+        }
+
+         .save-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+         }
+
+         .save-button:hover.visible {
+             background-color: #9000cc;
+         }
+
+    </style>
+</head>
+<body class="admin_page_body">
+    <script>
+        // Admin pages will remain light themed
+        document.body.classList.remove('dark-mode');
+    </script>
+    <div class="add-user-header">
+        <a href="admin.html" class="back-link">&larr;</a>
+        <h1 class="header-title">Add New User</h1>
+         <div style="width: 1.5em; margin-left: auto;"></div> <!-- Placeholder for centering -->
+    </div>
+
+    <div class="input-container">
+        <div class="input-wrapper">
+            <label for="mobileNumberInput">Mobile number</label>
+            <input type="text" id="mobileNumberInput" placeholder="Enter 10 digit number" inputmode="numeric" pattern="\d{10}" maxlength="10">
+        </div>
+        <div class="input-wrapper">
+            <label for="passwordInput">Password</label>
+            <input type="password" id="passwordInput" placeholder="Enter 6 digit password" inputmode="numeric" pattern="\d{6}" maxlength="6">
+        </div>
+         <button id="saveButton" class="save-button">Save</button> 
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+             console.log("Add New User page loaded.");
+
+            const mobileNumberInput = document.getElementById('mobileNumberInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const saveButton = document.getElementById('saveButton');
+
+            function checkInputs() {
+                 const isMobileValid = mobileNumberInput.value.trim().length === 10 && /^\d+$/.test(mobileNumberInput.value.trim());
+                 const isPasswordValid = passwordInput.value.trim().length === 6 && /^\d+$/.test(passwordInput.value.trim());
+
+                 if (isMobileValid && isPasswordValid) {
+                     saveButton.classList.add('visible');
+                 } else {
+                     saveButton.classList.remove('visible');
+                 }
+            }
+
+            mobileNumberInput.addEventListener('input', checkInputs);
+            passwordInput.addEventListener('input', checkInputs);
+
+            saveButton.addEventListener('click', function() {
+                if (!saveButton.classList.contains('visible')) {
+                    return; // Button is not enabled
+                }
+
+                const mobileNumber = mobileNumberInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                if (mobileNumber && password) {
+                    const adminAddedUsers = JSON.parse(localStorage.getItem('adminAddedUsers') || '[]');
+
+                    const existingUserIndex = adminAddedUsers.findIndex(user => user.phone === mobileNumber);
+
+                    if (existingUserIndex !== -1) {
+                         // User already exists, prevent adding again. Only allow password updates via login?
+                         // Or, just alert and prevent saving. Let's prevent saving.
+                         alert(`User with phone number ${mobileNumber} already exists. Cannot add duplicate.`);
+                         // Optionally clear inputs or just leave them
+                         // mobileNumberInput.value = '';
+                         // passwordInput.value = '';
+                         // checkInputs(); // Update button state
+                    } else {
+                         // User does not exist, add them
+                         adminAddedUsers.push({ phone: mobileNumber, password: password });
+                         alert(`New user ${mobileNumber} added successfully!`);
+                         localStorage.setItem('adminAddedUsers', JSON.stringify(adminAddedUsers));
+                         console.log('New user added:', { phone: mobileNumber, password: password });
+
+                         // Clear inputs and redirect after successful save
+                         mobileNumberInput.value = '';
+                         passwordInput.value = '';
+                         checkInputs(); // Update button state
+                         window.location.href = 'admin.html';
+                    }
+
+                } else {
+                    alert('Please enter both mobile number and password.');
+                }
+            });
+
+             checkInputs();
+
+        });
+    </script>
+</body>
+</html>

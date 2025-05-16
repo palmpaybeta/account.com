@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 60px; /* Add padding for fixed header */
+            padding-bottom: 80px; /* Add padding for fixed bottom nav */
+            box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #f0f0f0;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+        .admin-header .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative; /* For positioning coffee icon */
+        }
+
+        .admin-header img {
+            width: 30px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .admin-header .coffee-icon {
+            position: absolute;
+            left: 20px; /* Position it on the left */
+            font-size: 1.8em;
+            color: #AE00FF; /* Use theme color */
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .admin-main-content {
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            flex-grow: 1; /* Allow content to take up space */
+            padding-top: 20px; /* Space below the fixed header */
+            box-sizing: border-box;
+        }
+
+        .admin-main-content > p { /* Target paragraphs directly under main-content */
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        /* Styles for the user sections */
+        .admin-tab-bar {
+            display: flex;
+            justify-content: center; /* Center the single tab */
+            width: 100%;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px; /* Space below the tabs */
+        }
+
+        .admin-tab-item {
+            font-size: 1em;
+            color: #777;
+            text-align: center;
+            padding: 10px;
+            flex-basis: auto; /* Allow it to size based on content */
+            width: auto; /* Reset width */
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .admin-tab-item.active {
+            color: #AE00FF;
+            font-weight: bold;
+        }
+        .admin-tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -11px; /* Position below the text and padding */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background-color: #AE00FF;
+        }
+
+        /* Styles for the content sections */
+        .admin-content-section {
+            width: 100%;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            align-items: center;
+        }
+        .admin-content-section.active {
+            display: flex; /* Show when active */
+        }
+
+        /* Styles for Support Request box (reused from admin_support_chat.html) */
+        .support-request-box {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .support-request-box:hover {
+            background-color: #f9f9f9;
+        }
+
+        .request-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #AE00FF; /* Theme color for headers */
+            font-size: 1.1em;
+        }
+        .request-snippet {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .request-timestamp {
+            font-size: 0.7em;
+            color: #777;
+            text-align: right;
+            display: block;
+        }
+
+
+        /* Styles for the fixed bottom nav */
+        #admin-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 500;
+            padding: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .admin-bottom-icons-row {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        .admin-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            color: #777; /* Default icon color */
+            font-size: 0.9em;
+            text-align: center;
+            width: 30%; /* Distribute space */
+        }
+
+        .admin-icon-item i {
+            font-size: 2em;
+            line-height: 0; /* Needed for Phosphor icons */
+            transition: color 0.2s ease;
+        }
+        #admin-bottom-nav .admin-icon-item.active i {
+            color: #AE00FF;
+        }
+
+        .no-requests-message {
+            font-size: 1.1em;
+            color: #777;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body class="admin_page_body">
+    <script>
+        // Admin pages will remain light themed
+        document.body.classList.remove('dark-mode');
+    </script>
+    <div class="admin-header">
+        <div class="header-content">
+            <i id="admin-coffee-icon" class="ph-coffee coffee-icon"></i> <!-- Coffee icon -->
+            <img src="https://upload.pinnocent.com/assets/files/upload-1746004279.jpeg" alt="Logo">
+            <h1>Admin</h1>
+        </div>
+    </div>
+
+    <div class="admin-main-content">
+        <p>Welcome to the Admin Panel.</p>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tab-bar">
+            <div id="support-requests-tab" class="admin-tab-item active">Support Requests</div>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="support-requests-content" class="admin-content-section active">
+            <!-- Support requests will be loaded here -->
+            <p id="no-support-requests-message" class="no-requests-message hidden">No support requests yet.</p>
+        </div>
+
+        <!-- Add more admin-specific content here -->
+    </div>
+
+    <!-- Fixed Bottom Navigation -->
+    <div id="admin-bottom-nav">
+        <div class="admin-bottom-icons-row">
+            <div id="admin-nav-customer-service" class="admin-icon-item active">
+                <i class="ph-users"></i>
+            </div>
+            <div id="admin-nav-finance" class="admin-icon-item">
+                <i class="ph-currency-ngn"></i> <!-- Using Naira icon -->
+            </div>
+            <div id="admin-nav-communication" class="admin-icon-item">
+                <i class="ph-microphone"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Admin page loaded.");
+
+            const supportRequestsTab = document.getElementById('support-requests-tab');
+            const supportRequestsContent = document.getElementById('support-requests-content');
+            const noSupportRequestsMessage = document.getElementById('no-support-requests-message');
+            const adminCoffeeIcon = document.getElementById('admin-coffee-icon'); // Get coffee icon
+
+            // Get references to the new icon items
+            const adminNavCustomerService = document.getElementById('admin-nav-customer-service');
+            const adminNavFinance = document.getElementById('admin-nav-finance');
+            const adminNavCommunication = document.getElementById('admin-nav-communication'); // The communication icon
+            const adminBottomNavItems = document.querySelectorAll('#admin-bottom-nav .admin-icon-item');
+
+            // Add event listener for the coffee icon
+            adminCoffeeIcon.addEventListener('click', function() {
+                console.log("Admin coffee icon clicked. Redirecting to login page.");
+                window.location.href = 'index.html';
+            });
+
+            function showTab(tabId) {
+                // Only one tab now, simply activate it
+                supportRequestsTab.classList.remove('active');
+                supportRequestsContent.classList.remove('active');
+
+                if (tabId === 'support-requests') {
+                    supportRequestsTab.classList.add('active');
+                    supportRequestsContent.classList.add('active');
+                    displaySupportRequests();
+                }
+            }
+
+            function formatTimestampForAdmin(timestamp) {
+                const date = new Date(timestamp);
+                const options = {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                };
+                return new Intl.DateTimeFormat('en-US', options).format(date);
+            }
+
+            function displaySupportRequests() {
+                console.log("Displaying support requests for admin.");
+                supportRequestsContent.innerHTML = ''; // Clear existing content except the placeholder
+                supportRequestsContent.appendChild(noSupportRequestsMessage); // Re-add the message placeholder
+
+
+                const supportRequests = JSON.parse(localStorage.getItem('supportRequests') || '[]');
+
+                // Filter for requests with status 'new' or 'in_progress', and sort them newest first (using ID which is timestamp)
+                const activeRequests = supportRequests.filter(req => req.status === 'new' || req.status === 'in_progress').sort((a, b) => b.id - a.id);
+
+                if (activeRequests.length === 0) {
+                    noSupportRequestsMessage.classList.remove('hidden');
+                } else {
+                    noSupportRequestsMessage.classList.add('hidden'); // Hide the placeholder if there are requests
+                    activeRequests.forEach(request => {
+                        const requestBox = createRequestBox(request); // Use helper function
+                        supportRequestsContent.appendChild(requestBox);
+                    });
+                }
+            }
+
+            function createRequestBox(request) {
+                const requestBox = document.createElement('div');
+                requestBox.classList.add('support-request-box');
+                requestBox.dataset.requestId = request.id; // Store request ID
+
+                const header = document.createElement('div');
+                header.classList.add('request-header');
+                // Display User Phone and Source in header
+                header.textContent = `Request from ${request.userPhone} (${request.source === 'login' ? 'Login Page' : 'Profile Page'})`;
+
+                const snippet = document.createElement('div');
+                snippet.classList.add('request-snippet');
+                // Display snippet of the first message (user's initial message)
+                if (request.messages && request.messages.length > 0) {
+                    // Find the first user message if available, otherwise use the first message
+                    const firstUserMessage = request.messages.find(msg => msg.sender === 'user');
+                    snippet.textContent = firstUserMessage ? firstUserMessage.text : request.messages[0].text;
+                } else {
+                    snippet.textContent = 'No initial message.';
+                }
+
+                const timestamp = document.createElement('div');
+                timestamp.classList.add('request-timestamp');
+                // Use the timestamp of the first message or request creation
+                const requestTimestamp = request.messages && request.messages.length > 0 ? request.messages[0].timestamp : request.id;
+                timestamp.textContent = formatTimestampForAdmin(requestTimestamp);
+
+
+                requestBox.addEventListener('click', () => {
+                    // Navigate to the chat page for this request, passing the request ID
+                    window.location.href = `admin_support_chat.html?requestId=${request.id}`; // Navigate to admin_support_chat.html
+                });
+
+                requestBox.appendChild(header);
+                requestBox.appendChild(snippet);
+                requestBox.appendChild(timestamp);
+
+                return requestBox;
+            }
+
+            function setActiveAdminNavItem(selectedItem) {
+                adminBottomNavItems.forEach(item => item.classList.remove('active'));
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
+                }
+            }
+
+            // Set Customer Service icon as active initially (or the default tab)
+            setActiveAdminNavItem(adminNavCustomerService); // Assuming Customer Service corresponds to the Support Requests tab
+
+            // Add event listeners for bottom navigation
+            adminBottomNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Visually activate the clicked item
+                    adminBottomNavItems.forEach(navItem => navItem.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (this.id === 'admin-nav-customer-service') {
+                        console.log('Admin Customer Service icon clicked');
+                        // Show the Support Requests tab
+                        showTab('support-requests');
+
+                    } else if (this.id === 'admin-nav-finance') {
+                        console.log('Admin Finance icon clicked. Redirecting to finance page.');
+                        // Navigate to the new admin finance page
+                        window.location.href = 'admin_finance.html';
+
+                    } else if (this.id === 'admin-nav-communication') {
+                        console.log('Admin Communication icon clicked. Redirecting to add user page.');
+                        // Navigate to the add user page (which is now disabled)
+                        window.location.href = 'admin_add_user.html';
+                    }
+                });
+            });
+
+            // Set initial tab
+            showTab('support-requests'); // Show the default tab content on load
+        });
+    </script>
+</body>
+</html>

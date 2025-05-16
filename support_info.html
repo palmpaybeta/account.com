@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recharge Information</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-bottom: 60px; 
+        }
+
+        .info-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: justify;
+            overflow-y: auto; 
+            height: calc(100vh - 150px); 
+        }
+
+        .next-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 20px;
+            align-self: center; 
+            position: fixed; 
+            bottom: 20px; 
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="info-container">
+        <p>
+            All Palmpay Users are highly welcome to Palmpay Beta 2025, as of Opay Beta, we have decided to starts the program, you can also join our Beta program on the Apple app Store, Google Playstore or the Samsung Galaxy Store. This service enable users to partake from the Referral program, if you haven't referred a friend to use Palmpay, you can there by Use this service. This Service is not a investment platform or an hourly or daily Claiming program, you need to have a minimum of N2000 in your Palmpay account to process and activate your Palmpay Beta.
+        </p>
+        <p>
+            You should note that immediately we received your funds from Your Palmpay account you will get a notification and you're eligible to claim a minimum of N20,000. The funds goes like this, N2000 gets N20,000, N3000 gets N30,000, N5000 gets N50,000 and N10,000 gets N100,000, Note that Above N3000 will be seized on deposit if you're not a Palmpay Premium member, You should also Have it in mind that you must Enter your Full Palmpay name that you must used to process the activation, and if there's differences in the name, it can leads to withdrawal issues. Once you've made payments, You can click on the transaction confirm button there for us to process your payment and get you activated by transfering your Price money to your balance where you're to withdraw to your Palmpay account directly. But if you wish to transfer the money to other Bank account, it's acceptable as long as you've proven you're a Palmpay user.
+        </p>
+        <p>
+            This service is a competition service of the Nation most use banking services (Palmpay, Opay, Tenn, Moniepoint etc...)
+        </p>
+        <p>
+            Thanks for your cooperation
+        </p>
+    </div>
+    <button class="next-button" onclick="window.location.href='add_money.html'">Next</button>
+</body>
+</html>

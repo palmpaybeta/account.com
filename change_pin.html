@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change PIN</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .change-pin-header {
+             display: flex;
+             align-items: center;
+             padding: 15px 0;
+             background-color: #f0f0f0;
+             width: 100%;
+             box-sizing: border-box;
+             position: sticky;
+             top: 0;
+             z-index: 10;
+             margin-bottom: 30px;
+             justify-content: center;
+         }
+
+        .change-pin-header .back-link {
+            font-size: 1.5em;
+            color: #333;
+            text-decoration: none;
+            margin-right: 15px;
+            position: absolute;
+            left: 20px;
+        }
+
+        .change-pin-header .header-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 auto;
+        }
+
+        .input-wrapper {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper label {
+             display: block;
+             font-size: 0.9em;
+             color: #888;
+             margin-bottom: 5px;
+             text-align: left;
+        }
+
+        .input-wrapper input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 1.1em;
+            outline: none;
+            background-color: transparent;
+            box-sizing: border-box;
+            color: #333;
+            text-align: left;
+            letter-spacing: 3px; /* Spacing for PIN digits */
+        }
+
+        .input-wrapper input[type="password"]::placeholder {
+            color: #ccc;
+            letter-spacing: normal;
+        }
+
+         .error-message {
+             font-size: 0.9em;
+             color: #AE00FF; /* Use theme color for error */
+             margin-top: 5px;
+             text-align: left;
+         }
+
+         .save-button {
+            background-color: #AE00FF;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 30px;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0.5;
+            pointer-events: none;
+         }
+
+         .save-button.visible {
+             opacity: 1;
+             pointer-events: auto;
+         }
+
+         .save-button:hover.visible {
+             background-color: #9000cc;
+         }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Apply dark mode preference on page load
+        function applyUserDarkModePreference() {
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+            if (currentUserPhone) {
+                const darkModeEnabled = localStorage.getItem(`user_data_${currentUserPhone}_darkModeEnabled`) === 'true';
+                if (darkModeEnabled) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        applyUserDarkModePreference(); // Apply immediately
+    </script>
+    <div class="change-pin-header">
+         <a href="settings.html" class="back-link">&larr;</a>
+         <h1 class="header-title">Change PIN</h1>
+    </div>
+    <div class="input-wrapper">
+        <label for="currentPinInput">Current PIN</label>
+        <input type="password" id="currentPinInput" maxlength="4" inputmode="numeric">
+        <p id="currentPinError" class="error-message hidden">incorrect PIN</p>
+    </div>
+
+    <div id="newPinWrapper" class="input-wrapper hidden">
+        <label for="newPinInput">New PIN</label>
+        <input type="password" id="newPinInput" maxlength="4" inputmode="numeric">
+    </div>
+
+    <div id="confirmPinWrapper" class="input-wrapper hidden">
+        <label for="confirmPinInput">Confirm New PIN</label>
+        <input type="password" id="confirmPinInput" maxlength="4" inputmode="numeric">
+    </div>
+
+    <button id="saveButton" class="save-button">Save</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPinInput = document.getElementById('currentPinInput');
+            const currentPinError = document.getElementById('currentPinError');
+            const newPinWrapper = document.getElementById('newPinWrapper');
+            const newPinInput = document.getElementById('newPinInput');
+            const confirmPinWrapper = document.getElementById('confirmPinWrapper');
+            const confirmPinInput = document.getElementById('confirmPinInput');
+            const saveButton = document.getElementById('saveButton');
+            const currentUserPhone = localStorage.getItem('currentUserPhone');
+
+            const storedPassword = localStorage.getItem(`user_data_${currentUserPhone}_password`) || '191919'; 
+            const currentPin = storedPassword.substring(0, 4); 
+
+            const checkInputs = () => {
+                const currentPinValid = currentPinInput.value.length === 4;
+                const newPinValid = newPinInput.value.length === 4;
+                const confirmPinValid = confirmPinInput.value.length === 4;
+
+                if (currentPinValid) {
+                    // Check if the entered current PIN matches the first 4 digits of the stored password
+                    if (currentPinInput.value === currentPin) {
+                        currentPinError.classList.add('hidden');
+                        newPinWrapper.classList.remove('hidden');
+                        confirmPinWrapper.classList.remove('hidden');
+
+                        // Check if both new PIN fields are valid and match
+                        if (newPinValid && confirmPinValid && newPinInput.value === confirmPinInput.value) {
+                             saveButton.classList.add('visible');
+                         } else {
+                             saveButton.classList.remove('visible');
+                         }
+
+                    } else {
+                        currentPinError.classList.remove('hidden'); // Show incorrect PIN message
+                        newPinWrapper.classList.add('hidden');
+                        confirmPinWrapper.classList.add('hidden');
+                        saveButton.classList.remove('visible');
+                    }
+                } else {
+                    // If current PIN input is not 4 digits, hide subsequent fields and error
+                    currentPinError.classList.add('hidden');
+                    newPinWrapper.classList.add('hidden');
+                    confirmPinWrapper.classList.add('hidden');
+                    saveButton.classList.remove('visible');
+                }
+            };
+
+            currentPinInput.addEventListener('input', checkInputs);
+            newPinInput.addEventListener('input', checkInputs);
+            confirmPinInput.addEventListener('input', checkInputs);
+
+            saveButton.addEventListener('click', function() {
+                if (!saveButton.classList.contains('visible')) {
+                    return; // Button is not enabled
+                }
+
+                const newPin = newPinInput.value;
+                const currentUserPhone = localStorage.getItem('currentUserPhone');
+
+                // Check for password/PIN change lockout
+                 const lastChangeTimestamp = parseInt(localStorage.getItem(`user_data_${currentUserPhone}_lastPasswordChangeTimestamp`) || '0', 10);
+                 const now = Date.now();
+                 const lockDuration = 100000 * 1000; 
+
+                 if (now - lastChangeTimestamp < lockDuration) {
+                     // Show alert instead of hidden message div
+                     alert("#400_Error_wait_till_100000_seconds");
+                     return;
+                 }
+
+
+                // Construct the new 6-digit password: new PIN + last 2 digits of old password
+                const lastTwoDigitsOfOldPassword = storedPassword.substring(4, 6);
+                const newPassword = newPin + lastTwoDigitsOfOldPassword;
+
+                // Save the new 6-digit password and update the timestamp
+                localStorage.setItem(`user_data_${currentUserPhone}_password`, newPassword);
+                localStorage.setItem(`user_data_${currentUserPhone}_lastPasswordChangeTimestamp`, Date.now().toString()); 
+                console.log('PIN changed and timestamp recorded for user:', currentUserPhone);
+                console.log('New password stored:', newPassword); 
+
+
+                // Redirect back to settings
+                window.location.href = 'settings.html';
+            });
+
+            // Initial check on load
+            checkInputs();
+        });
+    </script>
+</body>
+</html>
